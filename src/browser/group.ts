@@ -14,7 +14,7 @@ let expiryTimer: ReturnType<typeof setTimeout>;
 function form(action: 'claim' | 'release', participantId: string, label: string): HTMLFormElement {
   const result = document.createElement('form'); result.method = 'post'; result.action = '/groups/' + code + '/' + action;
   for (const [name, value] of Object.entries({ csrfToken, participantId })) { const input = document.createElement('input'); input.type = 'hidden'; input.name = name; input.value = value; result.append(input); }
-  const button = document.createElement('button'); button.type = 'submit'; button.textContent = label; button.className = action === 'claim' ? 'button secondary' : 'text-button'; result.append(button); return result;
+  const button = document.createElement('button'); button.type = 'submit'; button.textContent = action === 'claim' ? 'That’s me' : label; button.setAttribute('aria-label', label); button.className = action === 'claim' ? 'button secondary' : 'text-button'; result.append(button); return result;
 }
 function render() {
   const own = state.snapshot;
@@ -76,6 +76,7 @@ socket.on('participant:released', () => { state.snapshot.selfId = null; state.sn
 socket.on('group:expired', expire);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') resume(); });
 window.addEventListener('pageshow', resume);
+window.addEventListener('pagehide', () => { state.connected = false; socket.disconnect(); });
 function resume() {
   if (state.expired || Date.now() >= state.deadlineLocal) { expire(); return; }
   element('result-section').hidden = true; element('recipient').textContent = '';

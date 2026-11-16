@@ -9,6 +9,16 @@ it('draw_requires_creator_and_all_connected_claims',()=>{
  expect(()=>s.draw(g.code,'stranger')).toThrow(expect.objectContaining({code:'FORBIDDEN'}));
  expect(()=>s.draw(g.code,'creator')).toThrow(expect.objectContaining({code:'NOT_READY'}));
 });
+it('last_disconnected_participant_blocks_a_previously_ready_draw',()=>{
+ const s=make();const g=readyGroup(s);s.disconnect('socket-1');
+ expect(()=>s.draw(g.code,g.sessions[0])).toThrow(expect.objectContaining({code:'NOT_READY'}));
+});
+it('activity_and_final_draw_never_extend_the_deadline',()=>{
+ let now=1000;const s=make({now:()=>now});const g=readyGroup(s);
+ now+=1_800_000;s.draw(g.code,g.sessions[0]);
+ now=3_600_999;expect(s.draw(g.code,g.sessions[0]).expiresAt).toBe(3_601_000);
+ now++;expect(()=>s.get(g.code,g.sessions[0])).toThrow(expect.objectContaining({code:'GROUP_UNAVAILABLE'}));
+});
 it('creator_without_claim_cannot_draw',()=>{
  const s=make();const g=readyGroup(s);s.release(g.code,g.sessions[0],g.ids[0]);s.claim(g.code,'outsider',g.ids[0]);s.connect(g.code,'outsider','outsider');
  expect(()=>s.draw(g.code,g.sessions[0])).toThrow(expect.objectContaining({code:'NOT_READY'}));

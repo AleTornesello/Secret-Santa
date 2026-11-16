@@ -17,7 +17,8 @@ export function createGroupService(options: { now: () => number; maxGroups: numb
   const connectionGroups = new Map<string, string>();
   const notify = (change: GroupChange) => { for (const listener of listeners) { try { listener(change); } catch { /* A subscriber must not roll back a committed mutation. */ } } };
   function remove(group: Record) {
-    if (!groups.delete(group.code)) return;
+    if (groups.get(group.code) !== group) return;
+    groups.delete(group.code);
     clearTimeout(group.timer);
     for (const connectionId of group.connections.keys()) connectionGroups.delete(connectionId);
     group.connections.clear(); group.assignments.clear();
@@ -52,7 +53,7 @@ export function createGroupService(options: { now: () => number; maxGroups: numb
       let code: string;
       do { code = options.newCode?.() ?? randomBytes(16).toString('hex'); } while (groups.has(code));
       const createdAt = options.now();
-      const timer = setTimeout(() => sweepExpired(), GROUP_TTL_MS); timer.unref?.();
+      const timer = setTimeout(() => remove(group), GROUP_TTL_MS); timer.unref?.();
       const group: Record = { code, revision: 1, createdAt, expiresAt: createdAt + GROUP_TTL_MS, status: 'WAITING', creatorSessionId: creator, participants: names.map(name => ({ id: randomUUID(), name, sessionId: null })), connections: new Map(), assignments: new Map(), timer };
       groups.set(code, group); notify({ code, revision: 1, expired: false });
       return snapshot(group, creator);

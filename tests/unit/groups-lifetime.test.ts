@@ -27,6 +27,20 @@ describe('group lifetime', () => {
     expect(changes).toEqual([{code:g.code,revision:g.revision+1,expired:true}]);
     expect(() => s.get(g.code,'creator')).toThrow();
   });
+  it('background_lifetime_is_bounded_when_wall_clock_moves_backwards', () => {
+    vi.useFakeTimers(); let now = 1000; const s = make(() => now);
+    const group = s.create(['Alice','Bob'], 'creator'); now = -3_600_000;
+    vi.advanceTimersByTime(3_600_000);
+    expect(() => s.get(group.code, 'creator')).toThrow(expect.objectContaining({ code: 'GROUP_UNAVAILABLE' }));
+  });
+  it('invitation_collision_cannot_overwrite_an_existing_group', () => {
+    const codes = ['a'.repeat(32), 'a'.repeat(32), 'b'.repeat(32)];
+    const service = createGroupService({ now: () => 1000, maxGroups: 10, newCode: () => codes.shift()! }); services.push(service);
+    const first = service.create(['Alice','Bob'], 'creator');
+    const second = service.create(['Carol','Dan'], 'other');
+    expect(first.code).toBe('a'.repeat(32)); expect(second.code).toBe('b'.repeat(32));
+    expect(service.get(first.code,'creator').participants[0].name).toBe('Alice');
+  });
   it('copies_snapshots_and_enforces_group_capacity', () => {
     const s = make(() => 1000,1); const g=s.create(['Alice','Bob'],'creator');
     g.participants[0].name='CHANGED';
