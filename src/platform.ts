@@ -7,6 +7,7 @@ import { createSessionStore } from './sessions/store.js';
 import { sessionFromCookie } from './http/session.js';
 import { groupRoutes } from './http/routes.js';
 import { renderError } from './http/errors.js';
+import { attachRealtime } from './realtime/server.js';
 export function createPlatform(options: { config: AppConfig; now?: () => number }) {
   const app = express();
   const groups = createGroupService({ now: options.now ?? Date.now, maxGroups: options.config.limits.maxGroups });
@@ -24,6 +25,7 @@ export function createPlatform(options: { config: AppConfig; now?: () => number 
   app.use(groupRoutes(groups, sessions, options.config));
   app.use(renderError);
   const httpServer = createServer(app);
-  return { httpServer, groups, sessions, async close(): Promise<void> { unsubscribe(); groups.close(); sessions.close(); if (httpServer.listening) await new Promise<void>((resolve, reject) => httpServer.close(error => error ? reject(error) : resolve())); } };
+  const realtime = attachRealtime(httpServer, groups, sessions, options.config);
+  return { httpServer, groups, sessions, async close(): Promise<void> { await realtime.close(); unsubscribe(); groups.close(); sessions.close(); if (httpServer.listening) await new Promise<void>((resolve, reject) => httpServer.close(error => error ? reject(error) : resolve())); } };
 }
 
