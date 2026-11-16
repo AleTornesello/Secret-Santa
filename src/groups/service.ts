@@ -29,6 +29,8 @@ export function createGroupService(options: { now: () => number; maxGroups: numb
     if (options.now() >= group.expiresAt) { remove(group); throw new GroupError('GROUP_UNAVAILABLE'); }
     return group;
   }
+  function waiting(group: Record) { if (group.status !== 'WAITING') throw new GroupError('DRAW_FINAL'); }
+  function changed(group: Record) { group.revision++; notify({ code: group.code, revision: group.revision, expired: false }); }
   function snapshot(group: Record, session: string): SessionGroupState {
     const self = group.participants.find(p => p.sessionId === session);
     const connectedSessions = new Set(group.connections.values());
@@ -55,6 +57,37 @@ export function createGroupService(options: { now: () => number; maxGroups: numb
       return snapshot(group, creator);
     },
     get(code: string, session: string): SessionGroupState { return snapshot(requireGroup(code), session); },
+    claim(code: string, session: string, participantId: string): SessionGroupState {
+      const group = requireGroup(code); waiting(group);
+      const participant = group.participants.find(p => p.id === participantId);
+      if (!participant) throw new GroupError('INVALID_REQUEST');
+      if (participant.sessionId === session) return snapshot(group, session);
+      if (group.participants.some(p => p.sessionId === session)) throw new GroupError('ALREADY_CLAIMED');
+      if (participant.sessionId !== null) throw new GroupError('NAME_TAKEN');
+      participant.sessionId = session; changed(group); return snapshot(group, session);
+    },
+    release(code: string, actor: string, participantId: string): SessionGroupState {
+      const group = requireGroup(code); waiting(group);
+      const participant = group.participants.find(p => p.id === participantId);
+      if (!participant) throw new GroupError('INVALID_REQUEST');
+      if (actor !== group.creatorSessionId && participant.sessionId !== actor) throw new GroupError('FORBIDDEN');
+      participant.sessionId = null; changed(group); return snapshot(group, actor);
+    },
+    connect(code: string, session: string, connectionId: string): SessionGroupState {
+      const group = requireGroup(code);
+      const previous = connectionGroups.get(connectionId);
+      if (previous && (previous !== code || group.connections.get(connectionId) !== session)) throw new GroupError('INVALID_REQUEST');
+      if (!previous) { group.connections.set(connectionId, session); connectionGroups.set(connectionId, code); changed(group); }
+      return snapshot(group, session);
+    },
+    disconnect(connectionId: string): void {
+      const code = connectionGroups.get(connectionId); if (!code) return;
+      connectionGroups.delete(connectionId);
+      const group = groups.get(code);
+      if (group?.connections.delete(connectionId)) {
+        if (options.now() >= group.expiresAt) remove(group); else changed(group);
+      }
+    },
     sweepExpired,
     onChange(listener: (change: GroupChange) => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     close() { for (const group of groups.values()) clearTimeout(group.timer); groups.clear(); connectionGroups.clear(); listeners.clear(); },

@@ -1,0 +1,12 @@
+import { afterEach, expect, it } from 'vitest';
+import { createGroupService } from '../../src/groups/service.js';
+const services: ReturnType<typeof createGroupService>[]=[];
+afterEach(()=>services.splice(0).forEach(s=>s.close()));
+function fixture() { const s=createGroupService({now:()=>1000,maxGroups:10}); services.push(s); const g=s.create(['Alice','Bob'],'creator'); return {s,g,a:g.participants[0].id,b:g.participants[1].id}; }
+it('only_one_session_claims_a_name',()=>{const {s,g,a}=fixture(); s.claim(g.code,'creator',a); expect(()=>s.claim(g.code,'bob',a)).toThrow(expect.objectContaining({code:'NAME_TAKEN'})); expect(s.get(g.code,'bob').selfId).toBeNull();});
+it('one_claim_per_session_per_group',()=>{const {s,g,a,b}=fixture(); s.claim(g.code,'creator',a); expect(()=>s.claim(g.code,'creator',b)).toThrow(expect.objectContaining({code:'ALREADY_CLAIMED'}));});
+it('creator_must_own_a_connected_identity_for_readiness',()=>{const {s,g,a,b}=fixture(); s.claim(g.code,'other',a); s.claim(g.code,'bob',b); s.connect(g.code,'other','a'); s.connect(g.code,'bob','b'); expect(s.get(g.code,'creator').ready).toBe(false); s.release(g.code,'creator',a); s.claim(g.code,'creator',a); expect(s.get(g.code,'creator').ready).toBe(false); s.connect(g.code,'creator','c'); expect(s.get(g.code,'creator').ready).toBe(true);});
+it('multiple_tabs_count_as_one_participant',()=>{const {s,g,a}=fixture(); s.claim(g.code,'creator',a); s.connect(g.code,'creator','1'); s.connect(g.code,'creator','2'); s.disconnect('1'); expect(s.get(g.code,'creator').participants[0].connected).toBe(true); s.disconnect('2'); s.disconnect('2'); expect(s.get(g.code,'creator').participants[0].connected).toBe(false);});
+it('release_revokes_all_old_tabs',()=>{const {s,g,a}=fixture(); s.claim(g.code,'old',a); s.connect(g.code,'old','1'); s.connect(g.code,'old','2'); expect(()=>s.release(g.code,'stranger',a)).toThrow(expect.objectContaining({code:'FORBIDDEN'})); s.release(g.code,'creator',a); expect(s.get(g.code,'old').selfId).toBeNull(); s.claim(g.code,'new',a); expect(s.get(g.code,'new').participants[0].connected).toBe(false);});
+it('release_preserves_creator_privileges_and_connections_cannot_switch_groups',()=>{const {s,g,a}=fixture(); s.claim(g.code,'creator',a); s.connect(g.code,'creator','1'); s.release(g.code,'creator',a); expect(s.get(g.code,'creator').isCreator).toBe(true); const other=s.create(['C','D'],'creator'); expect(()=>s.connect(other.code,'creator','1')).toThrow();});
+
