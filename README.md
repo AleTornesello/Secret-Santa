@@ -23,4 +23,6 @@ Deployment requires one continuously running server process. A restart loses eve
 
 Read the [requirements and design specification](docs/superpowers/specs/2026-11-16-secret-santa-design.md) for the user flow, group lifecycle, privacy rules, real-time behavior, and acceptance criteria.
 
+The [implementation plan](docs/superpowers/plans/2026-11-16-secret-santa-implementation.md) breaks delivery into ten tasks, with interfaces, verification steps, and deployment guidance.
+
 The specification distinguishes confirmed requirements from proposed defaults. This repository currently contains documentation only; installation and run instructions will be added when the application is implemented.
