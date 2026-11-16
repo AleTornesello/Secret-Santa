@@ -2,9 +2,9 @@
 
 Date: 2026-11-16
 
-Status: Draft for review
+Status: Implemented design baseline
 
-Scope: Product requirements and technical design; application implementation is outside this documentation task.
+Scope: Product requirements and technical design. See the [README](../../../README.md) for implementation, verification, and operation commands.
 
 ## 1. Purpose
 
@@ -70,7 +70,7 @@ Express documents rendering HTML through template engines, and EJS provides an E
 
 This offers React components and server rendering, which could help if the interface later becomes substantially larger. A custom server can host the application and Socket.IO together, but introduces framework conventions and deployment considerations. Next.js documents limitations associated with custom servers in its [custom server guide](https://nextjs.org/docs/app/guides/custom-server).
 
-The working recommendation is Express with EJS because the current flow is small. The user delegated the stack proposal; this draft does not record an explicit framework approval.
+The implementation uses Express with EJS because the current flow is small and all server behavior belongs in one process.
 
 ## 6. User journey
 
@@ -227,7 +227,7 @@ The future implementation should demonstrate these behaviors:
 - **Storage:** No database, group files, recipient browser storage, or personal-data logs are produced. A restart loses all active groups.
 - **Rendering and live behavior:** Initial pages contain server-rendered content, and participant status and private results update across separate browser sessions without manual refresh.
 
-These are verification targets for later implementation, not claims that application tests currently exist or pass.
+Unit, HTTP, real-time, production-startup, and browser tests verify these behaviors. Run the commands in the README to obtain fresh results for a checkout.
 
 ## 14. Decisions left to implementation
 
