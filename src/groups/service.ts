@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { GROUP_TTL_MS } from '../config.js';
 import { GroupError } from './errors.js';
 import { validateNames } from './names.js';
+import { assignRecipients } from './draw.js';
 import type { GroupChange, SessionGroupState } from './types.js';
 
 type Participant = { id: string; name: string; sessionId: string | null };
@@ -10,7 +11,7 @@ type Record = {
   creatorSessionId: string; participants: Participant[]; connections: Map<string, string>;
   assignments: Map<string, string>; timer: ReturnType<typeof setTimeout>;
 };
-export function createGroupService(options: { now: () => number; maxGroups: number; newCode?: () => string }) {
+export function createGroupService(options: { now: () => number; maxGroups: number; newCode?: () => string; assign?: typeof assignRecipients }) {
   const groups = new Map<string, Record>();
   const listeners = new Set<(change: GroupChange) => void>();
   const connectionGroups = new Map<string, string>();
@@ -57,6 +58,16 @@ export function createGroupService(options: { now: () => number; maxGroups: numb
       return snapshot(group, creator);
     },
     get(code: string, session: string): SessionGroupState { return snapshot(requireGroup(code), session); },
+    draw(code: string, creator: string): SessionGroupState {
+      const group = requireGroup(code);
+      if (group.creatorSessionId !== creator) throw new GroupError('FORBIDDEN');
+      if (group.status === 'DRAWN') return snapshot(group, creator);
+      if (!snapshot(group, creator).ready) throw new GroupError('NOT_READY');
+      const assignments = (options.assign ?? assignRecipients)(group.participants.map(p => p.id));
+      requireGroup(code);
+      group.assignments = assignments; group.status = 'DRAWN'; changed(group);
+      return snapshot(group, creator);
+    },
     claim(code: string, session: string, participantId: string): SessionGroupState {
       const group = requireGroup(code); waiting(group);
       const participant = group.participants.find(p => p.id === participantId);
