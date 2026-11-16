@@ -30,11 +30,16 @@ export function createPlatform(options: { config: AppConfig; now?: () => number 
   if (!options.config.production) app.use('/assets', express.static(fileURLToPath(new URL('../dist/public', import.meta.url))));
   app.use(express.urlencoded({ extended: false, limit: options.config.limits.maxBodyBytes }));
   app.use((req, _res, next) => { req.session = sessionFromCookie(req.headers.cookie, sessions); next(); });
-  const rateStores = [600_000, 60_000].map(windowMs => createRateStore({ now: options.now ?? Date.now, maxKeys: options.config.limits.maxRateKeys, windowMs }));
+  const rateStores = [600_000, 60_000, 600_000].map(windowMs => createRateStore({ now: options.now ?? Date.now, maxKeys: options.config.limits.maxRateKeys, windowMs }));
   const createLimit = rateLimit({ windowMs: 600_000, limit: 10, store: rateStores[0], handler: () => { throw new GroupError('CAPACITY_REACHED'); } });
   const mutateLimit = rateLimit({ windowMs: 60_000, limit: 120, store: rateStores[1], handler: () => { throw new GroupError('CAPACITY_REACHED'); } });
+  const sessionLimit = rateLimit({ windowMs: 600_000, limit: 50, store: rateStores[2], skip: req => !!req.session, handler: () => { throw new GroupError('CAPACITY_REACHED'); } });
   app.post('/groups', createLimit);
   app.use((req, res, next) => { if (req.method === 'POST') void mutateLimit(req, res, next); else next(); });
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.session && (req.path === '/' || /^\/groups\/[^/]+\/?$/.test(req.path))) void sessionLimit(req, res, next);
+    else next();
+  });
   app.use(groupRoutes(groups, sessions, options.config));
   app.use(renderError);
   const httpServer = createServer(app);

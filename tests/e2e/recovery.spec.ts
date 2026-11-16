@@ -21,6 +21,11 @@ test('offline_then_reconnect_preserves_recipient',async({browser,baseURL,platfor
  await g.guest.setOffline(true);await g.guest.setOffline(false);await g.bob.reload();await expect(g.bob.getByTestId('recipient')).toHaveText(before!);
  expect(platform.groups.get(g.code,await session(g.guest)).recipient?.name).toBe(before);
 });
+test('result_stays_hidden_until_session_revalidates_after_page_resume',async({browser,baseURL},info)=>{
+ const g=await exchange(browser,baseURL!,true,info.project.name==='mobile');const before=await g.bob.getByTestId('recipient').textContent();
+ await g.bob.evaluate(()=>window.dispatchEvent(new Event('pagehide')));await expect(g.bob.getByTestId('recipient')).toBeHidden();
+ await g.bob.evaluate(()=>window.dispatchEvent(new Event('pageshow')));await expect(g.bob.getByTestId('recipient')).toHaveText(before!);
+});
 test('two_tabs_do_not_duplicate_identity_or_presence',async({browser,baseURL,platform},info)=>{
  const g=await exchange(browser,baseURL!,false,info.project.name==='mobile');const tab=await g.guest.newPage();await tab.goto(g.link);
  await expect(tab.locator('#live-status')).toHaveText(/Everyone is here/);const guestId=await session(g.guest);

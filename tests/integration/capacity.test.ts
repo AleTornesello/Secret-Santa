@@ -1,4 +1,5 @@
 import { afterEach, expect, it } from 'vitest';
+import request from 'supertest';
 import { createPlatform, loadConfig, person, bootstrap, type TestPlatform } from '../helpers/platform.js';
 import { createRateStore } from '../../src/http/rate-store.js';
 const platforms:TestPlatform[]=[];afterEach(async()=>{await Promise.all(platforms.splice(0).map(p=>p.close()));});
@@ -17,6 +18,12 @@ it('http_creation_rate_limit_expires',async()=>{
  expect((await a.post('/groups',{names:'Alice\nBob'})).status).toBe(429);
  now+=600001;expect((await a.post('/groups',{names:'Alice\nBob'})).status).toBe(303);
  const b=await person(p);expect((await b.post('/groups',{names:'Alice\nBob'})).status).toBe(303);
+});
+it('bounds_anonymous_session_creation_on_page_requests',async()=>{
+ let now=Date.now();const p=make({MAX_SESSIONS:'100'},()=>now);
+ for(let i=0;i<50;i++)expect((await request(p.httpServer).get('/')).status).toBe(200);
+ expect((await request(p.httpServer).get('/')).status).toBe(429);
+ now+=600001;expect((await request(p.httpServer).get('/')).status).toBe(200);
 });
 it('rate_limit_counters_expire_and_distinct_keys_are_capped',()=>{
  let now=0;const store=createRateStore({now:()=>now,maxKeys:1,windowMs:100});

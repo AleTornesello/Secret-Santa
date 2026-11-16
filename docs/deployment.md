@@ -85,7 +85,7 @@ Do not cache personal pages or group mutations. Keep access logs disabled: invit
 | MAX_BODY_BYTES | 65536 | Maximum URL-encoded request body. |
 | MAX_SOCKET_BYTES | 4096 | Maximum incoming Socket.IO message. |
 
-Creation is limited to 10 requests per IP per 10 minutes; mutations to 120 per IP per minute; socket subscription attempts to 30 per connection per minute. These are application defaults, not a tested throughput guarantee. A group contains 2–50 unique names, each at most 80 Unicode code points. The roster is fixed at creation.
+New anonymous browser sessions are limited to 50 session-creating page requests per IP per 10 minutes. Group creation is limited to 10 requests per IP per 10 minutes; mutations to 120 per IP per minute; socket subscription attempts to 30 per connection per minute. These are application defaults, not a tested throughput guarantee. A group contains 2–50 unique names, each at most 80 Unicode code points. The roster is fixed at creation.
 
 The one-hour lifetime is fixed and cannot be configured or extended. Access checks enforce the creation deadline, and a cleanup timer removes each idle group even if the server wall clock moves backwards.
 

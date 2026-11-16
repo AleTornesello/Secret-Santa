@@ -9,6 +9,7 @@ bootstrap.remove();
 const csrfToken = element<HTMLInputElement>('csrf-token').value;
 const code = snapshot.code;
 let state: ClientState = { snapshot, connected: false, expired: false, deadlineLocal: Date.now() + snapshot.expiresAt - snapshot.serverNow };
+let identityValidated = true;
 const socket = io({ autoConnect: false });
 let expiryTimer: ReturnType<typeof setTimeout>;
 function form(action: 'claim' | 'release', participantId: string, label: string): HTMLFormElement {
@@ -21,8 +22,8 @@ function render() {
   element('expired-section').hidden = !state.expired;
   element('group-section').hidden = state.expired;
   element('invite-section').hidden = state.expired || own.status === 'DRAWN';
-  element('result-section').hidden = state.expired || !own.recipient;
-  element('recipient').textContent = state.expired ? '' : own.recipient?.name ?? '';
+  element('result-section').hidden = state.expired || !identityValidated || !own.recipient;
+  element('recipient').textContent = state.expired || !identityValidated ? '' : own.recipient?.name ?? '';
   element('group-title').textContent = state.expired ? 'Until the next surprise.' : own.status === 'DRAWN' ? 'The secret is out.' : 'Your people. Your exchange.';
   element('live-status').textContent = state.expired ? 'This group is no longer available.' : !state.connected ? 'Reconnecting… Your name is reserved.' : own.status === 'DRAWN' ? 'The draw is final. Your recipient is just for you.' : own.ready ? 'Everyone is here. Ready for a little magic.' : 'Waiting for everyone to choose their name and connect.';
   element('people-count').textContent = own.participants.filter(p => p.connected).length + '/' + own.participants.length + ' connected';
@@ -54,13 +55,13 @@ function synchronize() {
       state = applyPublicState(state, reply.snapshot, Date.now());
       if (!state.expired) state.snapshot = { ...reply.snapshot };
     }
-    state.connected = true; schedule(); render();
+    identityValidated = true; state.connected = true; schedule(); render();
   });
 }
 socket.on('connect', synchronize);
-socket.on('disconnect', () => { state.connected = false; render(); });
+socket.on('disconnect', () => { identityValidated = false; state.connected = false; render(); });
 socket.on('connect_error', (error: Error) => {
-  state.connected = false;
+  identityValidated = false; state.connected = false;
   if (error.message === 'FORBIDDEN') { state.snapshot.recipient = null; element('result-section').hidden = true; element('recipient').textContent = ''; }
   render();
 });
@@ -71,15 +72,15 @@ socket.on('participant:identity', (update: PrivateIdentity) => {
   if (!update.selfId) state.snapshot.recipient = null;
   render();
 });
-socket.on('participant:result', (update: PrivateResult) => { state = applyPrivateResult(state, update, Date.now()); schedule(); render(); });
+socket.on('participant:result', (update: PrivateResult) => { identityValidated = true; state = applyPrivateResult(state, update, Date.now()); schedule(); render(); });
 socket.on('participant:released', () => { state.snapshot.selfId = null; state.snapshot.recipient = null; render(); });
 socket.on('group:expired', expire);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') resume(); });
 window.addEventListener('pageshow', resume);
-window.addEventListener('pagehide', () => { state.connected = false; socket.disconnect(); });
+window.addEventListener('pagehide', () => { identityValidated = false; state.connected = false; render(); socket.disconnect(); });
 function resume() {
   if (state.expired || Date.now() >= state.deadlineLocal) { expire(); return; }
-  element('result-section').hidden = true; element('recipient').textContent = '';
+  identityValidated = false; element('result-section').hidden = true; element('recipient').textContent = '';
   state.connected = false; element<HTMLButtonElement>('draw-button').disabled = true;
   if (socket.connected) synchronize(); else socket.connect();
 }
