@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import type { PublicGroupState, SessionGroupState } from '../groups/types.js';
-import type { PrivateResult, SubscribeReply } from '../realtime/contracts.js';
+import type { PrivateResult, PrivateIdentity, SubscribeReply } from '../realtime/contracts.js';
 import { applyPublicState, applyPrivateResult, expireClient, type ClientState } from './state.js';
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const bootstrap = element('group-data');
@@ -64,9 +64,15 @@ socket.on('connect_error', (error: Error) => {
   if (error.message === 'FORBIDDEN') { state.snapshot.recipient = null; element('result-section').hidden = true; element('recipient').textContent = ''; }
   render();
 });
-socket.on('group:state', (update: PublicGroupState) => { state = applyPublicState(state, update, Date.now()); schedule(); render(); synchronize(); });
+socket.on('group:state', (update: PublicGroupState) => { state = applyPublicState(state, update, Date.now()); schedule(); render(); });
+socket.on('participant:identity', (update: PrivateIdentity) => {
+  if (state.expired || update.code !== code || update.revision < state.snapshot.revision) return;
+  state.snapshot.selfId = update.selfId; state.snapshot.isCreator = update.isCreator;
+  if (!update.selfId) state.snapshot.recipient = null;
+  render();
+});
 socket.on('participant:result', (update: PrivateResult) => { state = applyPrivateResult(state, update, Date.now()); schedule(); render(); });
-socket.on('participant:released', () => { state.snapshot.selfId = null; state.snapshot.recipient = null; render(); synchronize(); });
+socket.on('participant:released', () => { state.snapshot.selfId = null; state.snapshot.recipient = null; render(); });
 socket.on('group:expired', expire);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') resume(); });
 window.addEventListener('pageshow', resume);

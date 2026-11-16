@@ -183,6 +183,7 @@ After establishing its temporary session through HTTP, the browser connects to S
 | --- | --- |
 | `group:state` | Updated roster, presence, status, deadline, and readiness. No assignments or session tokens. |
 | `participant:result` | Owning session only: recipient ID, display name, and expiry. |
+| `participant:identity` | Owning session only: selected participant ID and creator flag, keeping other tabs synchronized without repeated subscriptions. |
 | `participant:released` | Revoked session: clear selected identity and return to name selection. |
 | `group:expired` | Connected group subscribers: clear local group state and show expiry. |
 | `group:error` | Requesting session only: stable error category and safe user-facing message. |

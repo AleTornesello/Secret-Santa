@@ -16,14 +16,16 @@ export function attachRealtime(httpServer: Server, groups: GroupService, session
     allowRequest(req, done) {
       const origin = req.headers.origin;
       const sameOriginPolling = !origin && req.headers['sec-fetch-site'] === 'same-origin' && new URL(req.url ?? '/', config.publicOrigin).searchParams.get('transport') === 'polling';
-      done(null, origin === config.publicOrigin || sameOriginPolling);
+      const session = sessionFromCookie(req.headers.cookie, sessions);
+      const count = session ? [...io.of('/').sockets.values()].filter(socket => socket.data.sessionId === session.id).length : 0;
+      done(null, !!session && (origin === config.publicOrigin || sameOriginPolling) && io.engine.clientsCount < config.limits.maxSockets && count < config.limits.maxSocketsPerSession);
     },
   });
   const subscriptions = new Map<string, Subscription>();
   io.use((socket, next) => {
     const session = sessionFromCookie(socket.request.headers.cookie, sessions);
-    if (!session) return next(new Error('FORBIDDEN'));
-    if (io.of('/').sockets.size >= config.limits.maxSockets || [...io.of('/').sockets.values()].filter(s => s.data.sessionId === session.id).length >= config.limits.maxSocketsPerSession) return next(new Error('CAPACITY_REACHED'));
+    if (!session) { next(new Error('FORBIDDEN')); socket.conn.close(); return; }
+    if (io.of('/').sockets.size >= config.limits.maxSockets || [...io.of('/').sockets.values()].filter(s => s.data.sessionId === session.id).length >= config.limits.maxSocketsPerSession) { next(new Error('CAPACITY_REACHED')); socket.conn.close(); return; }
     socket.data.sessionId = session.id;
     next();
   });
@@ -37,6 +39,7 @@ export function attachRealtime(httpServer: Server, groups: GroupService, session
       const own = groups.get(code, sub.sessionId);
       socket.emit('group:state', publicState satisfies PublicGroupState);
       if (sub.selfId && own.selfId !== sub.selfId) socket.emit('participant:released', { code, revision: state.revision });
+      if (own.selfId !== sub.selfId) socket.emit('participant:identity', { code, revision: own.revision, selfId: own.selfId, isCreator: own.isCreator });
       sub.selfId = own.selfId;
       if (own.recipient && sub.delivered !== own.recipient.id) {
         sub.delivered = own.recipient.id;
@@ -53,9 +56,13 @@ export function attachRealtime(httpServer: Server, groups: GroupService, session
     }
   });
   io.on('connection', (socket: Socket) => {
+    let attempts = 0;
+    let resetAt = Date.now() + 60_000;
     socket.on('group:subscribe', (payload: unknown, acknowledge?: (reply: SubscribeReply) => void) => {
       if (typeof acknowledge !== 'function') return;
       try {
+        if (Date.now() >= resetAt) { attempts = 0; resetAt = Date.now() + 60_000; }
+        if (++attempts > 30) throw new GroupError('CAPACITY_REACHED');
         const session = sessionFromCookie(socket.request.headers.cookie, sessions);
         if (!session) throw new GroupError('FORBIDDEN');
         if (!payload || typeof payload !== 'object' || !('code' in payload) || typeof payload.code !== 'string' || !('csrfToken' in payload) || !tokenMatches(payload.csrfToken, session.csrfToken)) throw new GroupError('INVALID_REQUEST');
