@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GROUP_SIZE, isValidGroupSize } from './group';
+import { GROUP_SIZE, isValidGroupSize } from './group.ts';
 
 describe('isValidGroupSize', () => {
   it('accepts the bounds', () => {

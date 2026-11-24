@@ -24,9 +24,23 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      FUNCTIONS_URL: http://127.0.0.1:54321/functions/v1
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm db:start
+      - run: pnpm stack:start
       - run: pnpm test:db
+      - name: Warm up the Edge Functions
+        run: |
+          for fn in create-group preview-group join-group get-group release-claim get-my-assignment; do
+            for attempt in $(seq 1 30); do
+              status=$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS "$FUNCTIONS_URL/$fn" || true)
+              if [ "$status" = "204" ]; then break; fi
+              sleep 2
+            done
+            echo "$fn: $status"
+            [ "$status" = "204" ]
+          done
+      - run: pnpm test:integration

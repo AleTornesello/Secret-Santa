@@ -17,7 +17,9 @@
     "e2e": "pnpm --filter @secret-santa/web e2e",
     "db:start": "supabase db start",
     "db:reset": "supabase db reset",
-    "test:db": "supabase test db"
+    "test:db": "supabase test db",
+    "stack:start": "supabase start -x studio,imgproxy,storage-api,logflare,vector,supavisor,postgres-meta,mailpit",
+    "test:integration": "pnpm --filter @secret-santa/functions test:integration"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
