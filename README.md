@@ -25,4 +25,16 @@ pnpm e2e           # Playwright end-to-end tests
 pnpm format        # Prettier
 ```
 
-The Supabase CLI is a dev dependency: `pnpm exec supabase start` runs the local stack (needs Docker).
+## Database
+
+The Supabase CLI is a dev dependency and needs Docker.
+
+```sh
+pnpm db:start      # start a local Postgres with the migrations applied
+pnpm db:reset      # re-apply every migration from scratch
+pnpm test:db       # pgTAP tests in supabase/tests/database
+```
+
+Every table has RLS on with no policies, and the public API roles have no privileges: clients
+cannot read or write anything directly. Edge Functions use the service role and check the
+caller's secret token.
