@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { isValidJoinCode, normalizeJoinCode } from '@secret-santa/shared';
 import type { GroupPreview, ParticipantSummary } from '@secret-santa/shared';
-import { Button, Card, JoinCounter, Ornament } from '../design/components';
+import { Button, Card, Ornament } from '../design/components';
 import { ErrorCard } from '../components/ErrorCard';
 import { GroupHeader } from '../components/GroupHeader';
 import { PrivateLinkCard } from '../components/PrivateLinkCard';
@@ -129,19 +129,7 @@ export function Join() {
 
   return (
     <>
-      <GroupHeader
-        eyebrow={t['join.eyebrow']}
-        name={group.name}
-        budget={group.budget}
-        budgetLine={t['join.budget']}
-      />
-      <Card>
-        <JoinCounter
-          joined={group.joined}
-          total={group.total}
-          label={t['dash.joined'](group.joined, group.total)}
-        />
-      </Card>
+      <GroupHeader group={group} eyebrow={t['join.eyebrow']} budgetLine={t['join.budget']} />
 
       {blocker ? (
         <Card>

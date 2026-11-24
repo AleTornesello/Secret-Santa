@@ -1,5 +1,6 @@
 import type { Messages } from './en';
 
+// Parameter types come from `Messages`, so they are not repeated here.
 export const it: Messages = {
   appName: 'Secret Santa',
   language: 'Lingua',
@@ -30,7 +31,7 @@ export const it: Messages = {
   'new.budget': 'Budget per regalo (facoltativo)',
   'new.budgetHint': 'In euro, per esempio 20 o 25,50.',
   'new.names': 'Nomi',
-  'new.namesHint': (count: number) =>
+  'new.namesHint': (count) =>
     `Un nome per riga, ${count} ${count === 1 ? 'nome' : 'nomi'}. Da 3 a 100.`,
   'new.playing': 'Partecipo anche io',
   'new.playingHint': 'Lascialo vuoto se organizzi soltanto.',
@@ -43,23 +44,22 @@ export const it: Messages = {
     'Inserisci un importo maggiore di 0 con al massimo 2 decimali, o lascia vuoto.',
   'new.errorTooFew': 'Aggiungi almeno 3 nomi.',
   'new.errorTooMany': 'Un gruppo può avere al massimo 100 nomi.',
-  'new.errorLong': (name: string) => `"${name}" supera i 40 caratteri.`,
-  'new.errorDuplicate': (name: string) => `"${name}" compare più di una volta.`,
+  'new.errorLong': (name) => `"${name}" supera i 40 caratteri.`,
+  'new.errorDuplicate': (name) => `"${name}" compare più di una volta.`,
   'new.errorOwn': 'Scegli quale nome è il tuo.',
 
   'dash.title': "Pannello dell'organizzatore",
-  'dash.budget': (amount: string) => `Budget: ${amount}`,
-  'dash.joined': (joined: number, total: number) => `${joined} su ${total} si sono uniti`,
+  'dash.budget': (amount) => `Budget: ${amount}`,
+  'dash.joined': (joined, total) => `${joined} su ${total} si sono uniti`,
   'dash.refresh': 'Aggiorna',
-  'dash.closesIn': (time: string) => `Le iscrizioni chiudono tra ${time}`,
+  'dash.closesIn': (time) => `Le iscrizioni chiudono tra ${time}`,
   'dash.closed': 'Le iscrizioni sono chiuse. Se qualcuno è rimasto fuori, crea un nuovo gruppo.',
   'dash.drawn': 'Si sono uniti tutti e i nomi sono stati estratti.',
   'dash.participants': 'Chi si è unito',
   'dash.joinedLabel': 'unito',
   'dash.notJoinedLabel': 'non ancora unito',
   'dash.release': 'Libera questo nome',
-  'dash.releaseConfirm': (name: string) =>
-    `Liberare "${name}" perché qualcun altro possa sceglierlo?`,
+  'dash.releaseConfirm': (name) => `Liberare "${name}" perché qualcun altro possa sceglierlo?`,
   'dash.releaseYes': 'Sì, liberalo',
   'dash.cancel': 'Annulla',
   'dash.notFound': 'Questo gruppo non esiste più, o questo dispositivo non ha accesso.',
@@ -73,8 +73,7 @@ export const it: Messages = {
   'share.copyLink': 'Copia link',
   'share.copied': 'Copiato',
   'share.share': 'Condividi',
-  'share.shareText': (group: string) =>
-    `Unisciti a "${group}" su Secret Santa e scegli il tuo nome:`,
+  'share.shareText': (group) => `Unisciti a "${group}" su Secret Santa e scegli il tuo nome:`,
   'share.qr': 'Oppure inquadra questo codice QR',
 
   'private.titleOrganizer': 'Salva il tuo link da organizzatore',
@@ -86,22 +85,21 @@ export const it: Messages = {
   'private.copy': 'Copia link privato',
 
   'join.eyebrow': 'Sei tra gli invitati',
-  'join.budget': (amount: string) => `Budget per regalo: ${amount}`,
+  'join.budget': (amount) => `Budget per regalo: ${amount}`,
   'join.pick': 'Chi sei?',
   'join.pickHint': 'Scegli il tuo nome. I nomi già presi sono in grigio.',
   'join.takenLabel': 'già preso',
   'join.continue': 'Continua',
-  'join.confirmTitle': (name: string) => `Sei ${name}?`,
+  'join.confirmTitle': (name) => `Sei ${name}?`,
   'join.confirmBody':
     'Confermando, questo nome diventa tuo su questo dispositivo. Sceglilo solo se sei davvero tu.',
-  'join.confirmYes': (name: string) => `Sì, sono ${name}`,
+  'join.confirmYes': (name) => `Sì, sono ${name}`,
   'join.back': 'Scegli un altro nome',
   'join.joining': 'Un attimo…',
-  'join.doneTitle': (name: string) => `Ci sei, ${name}!`,
+  'join.doneTitle': (name) => `Ci sei, ${name}!`,
   'join.doneBody': 'Il tuo destinatario comparirà qui appena tutti avranno scelto il proprio nome.',
   'join.openMine': 'Vai al mio destinatario',
-  'join.alreadyJoined': (name: string) =>
-    `Questo dispositivo si è già unito a questo gruppo come ${name}.`,
+  'join.alreadyJoined': (name) => `Questo dispositivo si è già unito a questo gruppo come ${name}.`,
   'join.notFound': "Nessun gruppo ha questo codice. Controllalo con l'organizzatore.",
   'join.closed':
     "Le iscrizioni a questo gruppo sono chiuse. Chiedi all'organizzatore di crearne uno nuovo.",
@@ -122,6 +120,6 @@ export const it: Messages = {
   'error.internal': 'Qualcosa è andato storto da parte nostra. Riprova.',
   'error.network': 'Impossibile raggiungere il server. Controlla la connessione e riprova.',
 
-  'time.hoursMinutes': (hours: number, minutes: number) => `${hours} h ${minutes} min`,
-  'time.minutes': (minutes: number) => `${minutes} min`,
+  'time.hoursMinutes': (hours, minutes) => `${hours} h ${minutes} min`,
+  'time.minutes': (minutes) => `${minutes} min`,
 };

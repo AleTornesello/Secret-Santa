@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { AdminGroupView, ParticipantSummary } from '@secret-santa/shared';
-import { Button, Card, JoinCounter, ParticipantChip } from '../design/components';
+import { Button, Card, ParticipantChip } from '../design/components';
 import { useI18n } from '../i18n/I18nProvider';
 import { ErrorCard } from '../components/ErrorCard';
 import { GroupHeader } from '../components/GroupHeader';
@@ -100,19 +100,7 @@ export function Dashboard() {
 
   return (
     <>
-      <GroupHeader
-        eyebrow={t['dash.title']}
-        name={group.name}
-        budget={group.budget}
-        budgetLine={t['dash.budget']}
-      />
-
-      <Card>
-        <JoinCounter
-          joined={group.joined}
-          total={group.total}
-          label={t['dash.joined'](group.joined, group.total)}
-        />
+      <GroupHeader group={group} eyebrow={t['dash.title']} budgetLine={t['dash.budget']}>
         {drawn ? (
           <p className={styles.notice}>{t['dash.drawn']}</p>
         ) : (
@@ -123,7 +111,7 @@ export function Dashboard() {
             {t['dash.myRecipient']}
           </Link>
         )}
-      </Card>
+      </GroupHeader>
 
       {!drawn && <ShareCard groupName={group.name} joinCode={group.joinCode} />}
 
