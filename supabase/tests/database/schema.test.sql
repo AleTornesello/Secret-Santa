@@ -6,6 +6,8 @@ select plan(27);
 -- Fixtures ------------------------------------------------------------------
 
 create temporary table fx (key text primary key, id uuid);
+create function pg_temp.fx_id(k text) returns uuid language sql as
+  $$select id from fx where key = k$$;
 
 with g as (
   insert into public.groups (name, join_code, admin_token_hash)
@@ -23,7 +25,7 @@ insert into fx select 'g2', id from g;
 
 with p as (
   insert into public.participants (group_id, display_name)
-  select (select id from fx where key = 'g1'), name
+  select pg_temp.fx_id('g1'), name
   from (values ('Anna'), ('Marco'), ('Giulia')) as v (name)
   returning id, display_name
 )
@@ -92,7 +94,7 @@ reset role;
 -- Groups ----------------------------------------------------------------------
 
 select is(
-  (select join_deadline - created_at from public.groups where id = (select id from fx where key = 'g1')),
+  (select join_deadline - created_at from public.groups where id = pg_temp.fx_id('g1')),
   interval '24 hours',
   'joining closes 24 hours after creation'
 );
@@ -129,7 +131,7 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$update public.groups set status = 'drawn' where id = (select id from fx where key = 'g2')$$,
+  $$update public.groups set status = 'drawn' where id = pg_temp.fx_id('g2')$$,
   '23514', null, 'a drawn group needs drawn_at'
 );
 
@@ -137,53 +139,43 @@ select throws_ok(
 
 select throws_ok(
   $$insert into public.participants (group_id, display_name)
-    values ((select id from fx where key = 'g1'), 'ANNA')$$,
+    values (pg_temp.fx_id('g1'), 'ANNA')$$,
   '23505', null, 'names are unique per group, ignoring case'
 );
 
 select lives_ok(
   $$insert into public.participants (group_id, display_name)
-    values ((select id from fx where key = 'g2'), 'Anna')$$,
+    values (pg_temp.fx_id('g2'), 'Anna')$$,
   'the same name can appear in another group'
 );
 
 select throws_ok(
   $$update public.participants set player_token_hash = repeat('1', 64)
-    where id = (select id from fx where key = 'p1')$$,
+    where id = pg_temp.fx_id('p1')$$,
   '23514', null, 'a claim needs both the token hash and claimed_at'
 );
 
 -- Assignments ------------------------------------------------------------------
 
 select throws_ok(
-  $$insert into public.assignments values
-    ((select id from fx where key = 'g1'), (select id from fx where key = 'p1'),
-     (select id from fx where key = 'p1'))$$,
+  $$insert into public.assignments values (pg_temp.fx_id('g1'), pg_temp.fx_id('p1'), pg_temp.fx_id('p1'))$$,
   '23514', null, 'nobody can be assigned to themselves'
 );
 
-insert into public.assignments values
-  ((select id from fx where key = 'g1'), (select id from fx where key = 'p1'),
-   (select id from fx where key = 'p2'));
+insert into public.assignments values (pg_temp.fx_id('g1'), pg_temp.fx_id('p1'), pg_temp.fx_id('p2'));
 
 select throws_ok(
-  $$insert into public.assignments values
-    ((select id from fx where key = 'g1'), (select id from fx where key = 'p1'),
-     (select id from fx where key = 'p3'))$$,
+  $$insert into public.assignments values (pg_temp.fx_id('g1'), pg_temp.fx_id('p1'), pg_temp.fx_id('p3'))$$,
   '23505', null, 'everyone gives exactly once'
 );
 
 select throws_ok(
-  $$insert into public.assignments values
-    ((select id from fx where key = 'g1'), (select id from fx where key = 'p3'),
-     (select id from fx where key = 'p2'))$$,
+  $$insert into public.assignments values (pg_temp.fx_id('g1'), pg_temp.fx_id('p3'), pg_temp.fx_id('p2'))$$,
   '23505', null, 'everyone receives exactly once'
 );
 
 select throws_ok(
-  $$insert into public.assignments values
-    ((select id from fx where key = 'g2'), (select id from fx where key = 'p2'),
-     (select id from fx where key = 'p3'))$$,
+  $$insert into public.assignments values (pg_temp.fx_id('g2'), pg_temp.fx_id('p2'), pg_temp.fx_id('p3'))$$,
   '23503', null, 'giver and receiver must belong to the assignment''s group'
 );
 

@@ -1,0 +1,12 @@
+name: Set up Node and dependencies
+description: Installs Node 22, enables the pnpm version pinned in package.json, and installs packages.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - run: corepack enable
+      shell: bash
+    - run: pnpm install --frozen-lockfile
+      shell: bash
