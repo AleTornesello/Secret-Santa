@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { isValidJoinCode, normalizeJoinCode } from '@secret-santa/shared';
 import type { GroupPreview, ParticipantSummary } from '@secret-santa/shared';
 import { Button, Card, JoinCounter, Ornament } from '../design/components';
+import { ErrorCard } from '../components/ErrorCard';
+import { GroupHeader } from '../components/GroupHeader';
 import { PrivateLinkCard } from '../components/PrivateLinkCard';
 import { useI18n } from '../i18n/I18nProvider';
 import { api, ApiError, type ClientErrorCode } from '../lib/api';
@@ -18,19 +20,6 @@ type Step =
   | { kind: 'pick'; group: GroupPreview; notice?: string }
   | { kind: 'confirm'; group: GroupPreview; participant: ParticipantSummary; busy: boolean }
   | { kind: 'done'; groupId: string; name: string; playerToken: string };
-
-function GroupHeader({ group }: { group: GroupPreview }) {
-  const { t, formatMoney } = useI18n();
-  return (
-    <section>
-      <p className={pageStyles.eyebrow}>{t['join.eyebrow']}</p>
-      <h1 className={pageStyles.title}>{group.name}</h1>
-      {group.budget !== null && (
-        <p className={pageStyles.muted}>{t['join.budget'](formatMoney(group.budget))}</p>
-      )}
-    </section>
-  );
-}
 
 export function Join() {
   const { code: rawCode = '' } = useParams();
@@ -97,17 +86,10 @@ export function Join() {
   if (view.kind === 'error') {
     const message = view.code === 'not_found' ? t['join.notFound'] : t[`error.${view.code}`];
     return (
-      <Card>
-        <p role="alert">{message}</p>
-        <div className={pageStyles.links}>
-          <Link to="/">{t.backHome}</Link>
-          {view.code !== 'not_found' && (
-            <Button variant="ghost" onClick={() => void load()}>
-              {t.tryAgain}
-            </Button>
-          )}
-        </div>
-      </Card>
+      <ErrorCard
+        message={message}
+        onRetry={view.code === 'not_found' ? undefined : () => void load()}
+      />
     );
   }
 
@@ -147,7 +129,12 @@ export function Join() {
 
   return (
     <>
-      <GroupHeader group={group} />
+      <GroupHeader
+        eyebrow={t['join.eyebrow']}
+        name={group.name}
+        budget={group.budget}
+        budgetLine={t['join.budget']}
+      />
       <Card>
         <JoinCounter
           joined={group.joined}

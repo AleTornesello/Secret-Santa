@@ -1,27 +1,17 @@
 import { expect, test, type Page } from '@playwright/test';
-
-const GROUP_ID = '6f1c1f4e-6f0a-4c4e-9a52-1f9a7e0b8c11';
-const ADMIN = 'a'.repeat(43);
+import { ADMIN, GROUP_ID, groupView } from './fixtures';
 const PAGES = ['/#/', '/#/new', `/#/g/${GROUP_ID}`, '/#/join/ABCD2345', '/#/design'];
 
 async function mockApi(page: Page) {
   await page.route('http://api.test/functions/v1/*', (route) =>
     route.fulfill({
-      json: {
-        id: GROUP_ID,
-        name: 'Natale in ufficio con i colleghi del terzo piano',
-        budget: 20,
-        status: 'open',
-        joinDeadline: new Date(Date.now() + 24 * 3_600_000).toISOString(),
-        joinCode: 'ABCD2345',
-        joined: 1,
-        total: 3,
-        participants: [
-          { id: 'a', name: 'Anna Maria Bianchi Rossi', taken: true },
-          { id: 'b', name: 'Marco', taken: false },
-          { id: 'c', name: 'Giulia', taken: false },
-        ],
-      },
+      json: groupView(
+        ['Anna Maria Bianchi Rossi', 'Marco', 'Giulia'],
+        new Set(['Anna Maria Bianchi Rossi']),
+        {
+          name: 'Natale in ufficio con i colleghi del terzo piano',
+        },
+      ),
     }),
   );
   await page.goto('/#/');

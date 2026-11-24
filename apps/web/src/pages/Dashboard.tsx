@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import type { AdminGroupView, ParticipantSummary } from '@secret-santa/shared';
 import { Button, Card, JoinCounter, ParticipantChip } from '../design/components';
 import { useI18n } from '../i18n/I18nProvider';
+import { ErrorCard } from '../components/ErrorCard';
+import { GroupHeader } from '../components/GroupHeader';
 import { PrivateLinkCard } from '../components/PrivateLinkCard';
 import { ShareCard } from '../components/ShareCard';
 import { api, ApiError, type ClientErrorCode } from '../lib/api';
@@ -33,7 +35,7 @@ export function Dashboard() {
   const { groupId = '' } = useParams();
   const [search] = useSearchParams();
   const navigate = useNavigate();
-  const { t, formatMoney } = useI18n();
+  const { t } = useI18n();
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [confirming, setConfirming] = useState<string>();
   const [actionError, setActionError] = useState<string>();
@@ -88,19 +90,8 @@ export function Dashboard() {
         : view.code === 'not_found' || view.code === 'unauthorized'
           ? t['dash.notFound']
           : t[`error.${view.code}`];
-    return (
-      <Card>
-        <p role="alert">{message}</p>
-        <div className={styles.links}>
-          <Link to="/">{t.backHome}</Link>
-          {view.code !== 'no_token' && view.code !== 'not_found' && (
-            <Button variant="ghost" onClick={() => void load()}>
-              {t.tryAgain}
-            </Button>
-          )}
-        </div>
-      </Card>
-    );
+    const retry = view.code !== 'no_token' && view.code !== 'not_found';
+    return <ErrorCard message={message} onRetry={retry ? () => void load() : undefined} />;
   }
 
   const { group } = view;
@@ -109,13 +100,12 @@ export function Dashboard() {
 
   return (
     <>
-      <section>
-        <p className={styles.eyebrow}>{t['dash.title']}</p>
-        <h1 className={styles.title}>{group.name}</h1>
-        {group.budget !== null && (
-          <p className={styles.muted}>{t['dash.budget'](formatMoney(group.budget))}</p>
-        )}
-      </section>
+      <GroupHeader
+        eyebrow={t['dash.title']}
+        name={group.name}
+        budget={group.budget}
+        budgetLine={t['dash.budget']}
+      />
 
       <Card>
         <JoinCounter

@@ -1,7 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-const GROUP_ID = '6f1c1f4e-6f0a-4c4e-9a52-1f9a7e0b8c11';
-const ADMIN = 'a'.repeat(43);
+import { ADMIN, GROUP_ID, groupView, PLAYER, switchToEnglish } from './fixtures';
 
 /** Answers the Edge Function calls in the browser, so these tests need no backend. */
 async function mockApi(page: Page) {
@@ -9,21 +7,7 @@ async function mockApi(page: Page) {
     created: null as null | Record<string, unknown>,
     taken: new Set(['Marco']),
   };
-  const view = () => ({
-    id: GROUP_ID,
-    name: 'Natale in ufficio',
-    budget: 20,
-    status: 'open',
-    joinDeadline: new Date(Date.now() + 24 * 3_600_000).toISOString(),
-    joinCode: 'ABCD2345',
-    joined: state.taken.size,
-    total: 3,
-    participants: ['Anna', 'Giulia', 'Marco'].map((name) => ({
-      id: name,
-      name,
-      taken: state.taken.has(name),
-    })),
-  });
+  const view = () => groupView(['Anna', 'Giulia', 'Marco'], state.taken);
   await page.route('http://api.test/functions/v1/*', async (route) => {
     const name = route.request().url().split('/').at(-1);
     const body = route.request().postDataJSON() as Record<string, unknown>;
@@ -34,7 +18,7 @@ async function mockApi(page: Page) {
           groupId: GROUP_ID,
           joinCode: 'ABCD2345',
           adminToken: ADMIN,
-          playerToken: 'p'.repeat(43),
+          playerToken: PLAYER,
           participantId: 'Marco',
         },
       });
@@ -55,7 +39,7 @@ test('an organizer creates a group and gets everything needed to invite friends'
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   const api = await mockApi(page);
   await page.goto('/');
-  await page.getByRole('combobox', { name: /Language|Lingua/ }).selectOption('en');
+  await switchToEnglish(page);
   await page.getByRole('link', { name: 'Create a group' }).click();
 
   await page.getByLabel('Group name').fill('Natale in ufficio');

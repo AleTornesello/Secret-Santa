@@ -1,6 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-const GROUP_ID = '6f1c1f4e-6f0a-4c4e-9a52-1f9a7e0b8c11';
+import { GROUP_ID, groupView, PLAYER, switchToEnglish } from './fixtures';
 
 /** A tiny in-browser stand-in for the API: three names, Anna already taken. */
 async function mockApi(page: Page) {
@@ -19,26 +18,17 @@ async function mockApi(page: Page) {
         json: {
           groupId: GROUP_ID,
           participantId: body.participantId,
-          playerToken: 'p'.repeat(43),
+          playerToken: PLAYER,
           status: 'open',
         },
       });
     }
     return route.fulfill({
-      json: {
-        id: GROUP_ID,
+      json: groupView(['Anna', 'Giulia', 'Marco'], taken, {
         name: 'Natale in famiglia',
         budget: 30,
-        status: 'open',
         joinDeadline: new Date(Date.now() + 3_600_000).toISOString(),
-        joined: taken.size,
-        total: 3,
-        participants: ['Anna', 'Giulia', 'Marco'].map((n) => ({
-          id: n,
-          name: n,
-          taken: taken.has(n),
-        })),
-      },
+      }),
     });
   });
 }
@@ -48,7 +38,7 @@ test('a friend opens the join link, picks their name and gets their private link
 }) => {
   await mockApi(page);
   await page.goto('/#/join/ABCD2345');
-  await page.getByRole('combobox', { name: /Language|Lingua/ }).selectOption('en');
+  await switchToEnglish(page);
 
   await expect(page.getByRole('heading', { name: 'Natale in famiglia' })).toBeVisible();
   await expect(page.getByText('1 of 3 joined')).toBeVisible();
@@ -73,7 +63,7 @@ test('a friend opens the join link, picks their name and gets their private link
 test('a friend types the code on the home page', async ({ page }) => {
   await mockApi(page);
   await page.goto('/#/');
-  await page.getByRole('combobox', { name: /Language|Lingua/ }).selectOption('en');
+  await switchToEnglish(page);
   await page.getByLabel('Join code').fill('abcd-2345');
   await page.getByRole('button', { name: 'Join' }).click();
   await expect(page).toHaveURL(/#\/join\/ABCD2345$/);
@@ -83,7 +73,7 @@ test('a friend types the code on the home page', async ({ page }) => {
 test('a wrong code says so', async ({ page }) => {
   await mockApi(page);
   await page.goto('/#/join/ZZZZ2222');
-  await page.getByRole('combobox', { name: /Language|Lingua/ }).selectOption('en');
+  await switchToEnglish(page);
   await expect(page.getByRole('alert')).toHaveText(
     'No group has this code. Check it with the organizer.',
   );

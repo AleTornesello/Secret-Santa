@@ -1,6 +1,6 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { App } from '../App';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { fail, go, mockApi, resetAppBetweenTests } from '../test/harness';
 import { getDeviceGroup, saveDeviceGroup } from '../lib/deviceGroups';
 
 const GROUP_ID = '6f1c1f4e-6f0a-4c4e-9a52-1f9a7e0b8c11';
@@ -24,41 +24,18 @@ function preview(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function mockApi(handlers: Record<string, (body: Record<string, unknown>) => [number, unknown]>) {
-  const calls: { name: string; body: Record<string, unknown> }[] = [];
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string, init: RequestInit) => {
-      const name = url.split('/').at(-1) ?? '';
-      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
-      calls.push({ name, body });
-      const [status, payload] = handlers[name]?.(body) ?? [404, { error: 'not_found' }];
-      return new Response(JSON.stringify(payload), { status });
-    }),
-  );
-  return calls;
-}
-
-function go(path: string) {
-  window.location.hash = `#${path}`;
-  render(<App locale="en" />);
-}
-
-beforeEach(() => localStorage.clear());
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-  window.location.hash = '';
-});
+resetAppBetweenTests();
 
 describe('join', () => {
   it('lets a friend pick a free name, confirm it and keep the token on this device', async () => {
     const calls = mockApi({
-      'preview-group': () => [200, preview()],
-      'join-group': () => [
-        200,
-        { groupId: GROUP_ID, participantId: 'p2', playerToken: PLAYER, status: 'open' },
-      ],
+      'preview-group': () => preview(),
+      'join-group': () => ({
+        groupId: GROUP_ID,
+        participantId: 'p2',
+        playerToken: PLAYER,
+        status: 'open',
+      }),
     });
     go('/join/abcd-2345');
     expect(await screen.findByRole('heading', { name: 'Natale' })).toBeDefined();
@@ -71,7 +48,7 @@ describe('join', () => {
     fireEvent.click(screen.getByRole('button', { name: "Yes, I'm Marco" }));
 
     expect(await screen.findByRole('heading', { name: "You're in, Marco!" })).toBeDefined();
-    expect(calls.at(-1)).toEqual({
+    expect(calls.at(-1)).toMatchObject({
       name: 'join-group',
       body: { code: 'ABCD2345', participantId: 'p2' },
     });
@@ -86,20 +63,17 @@ describe('join', () => {
     mockApi({
       'preview-group': () => {
         previews++;
-        return [
-          200,
-          previews === 1
-            ? preview()
-            : preview({
-                participants: [
-                  { id: 'p1', name: 'Anna', taken: true },
-                  { id: 'p2', name: 'Marco', taken: true },
-                  { id: 'p3', name: 'Giulia', taken: false },
-                ],
-              }),
-        ];
+        return previews === 1
+          ? preview()
+          : preview({
+              participants: [
+                { id: 'p1', name: 'Anna', taken: true },
+                { id: 'p2', name: 'Marco', taken: true },
+                { id: 'p3', name: 'Giulia', taken: false },
+              ],
+            });
       },
-      'join-group': () => [409, { error: 'already_taken' }],
+      'join-group': () => fail(409, 'already_taken'),
     });
     go('/join/ABCD2345');
     fireEvent.click(await screen.findByLabelText('Marco'));
@@ -110,7 +84,7 @@ describe('join', () => {
   });
 
   it('can go back from the confirmation', async () => {
-    mockApi({ 'preview-group': () => [200, preview()] });
+    mockApi({ 'preview-group': () => preview() });
     go('/join/ABCD2345');
     fireEvent.click(await screen.findByLabelText('Giulia'));
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
@@ -121,21 +95,14 @@ describe('join', () => {
   it.each([
     [
       'an unknown code',
-      { 'preview-group': () => [404, { error: 'not_found' }] },
+      { 'preview-group': () => fail(404, 'not_found') },
       /No group has this code/,
     ],
-    [
-      'a drawn group',
-      { 'preview-group': () => [200, preview({ status: 'drawn' })] },
-      /names are drawn/,
-    ],
+    ['a drawn group', { 'preview-group': () => preview({ status: 'drawn' }) }, /names are drawn/],
     [
       'a closed group',
       {
-        'preview-group': () => [
-          200,
-          preview({ joinDeadline: new Date(Date.now() - 1000).toISOString() }),
-        ],
+        'preview-group': () => preview({ joinDeadline: new Date(Date.now() - 1000).toISOString() }),
       },
       /Joining for this group is closed/,
     ],
@@ -155,7 +122,7 @@ describe('join', () => {
 
   it('recognises a device that already joined', async () => {
     saveDeviceGroup({ groupId: GROUP_ID, name: 'Natale', playerToken: PLAYER, me: 'Marco' });
-    mockApi({ 'preview-group': () => [200, preview()] });
+    mockApi({ 'preview-group': () => preview() });
     go('/join/ABCD2345');
     expect((await screen.findByRole('status')).textContent).toMatch(
       /already joined this group as Marco/,
