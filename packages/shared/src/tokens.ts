@@ -3,8 +3,12 @@ export function generateToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
+  const base64 = btoa(binary).replaceAll('+', '-').replaceAll('/', '_');
+  // Strip the padding without a regular expression: at most two trailing '='.
+  let end = base64.length;
+  while (end > 0 && base64[end - 1] === '=') end--;
+  return base64.slice(0, end);
 }
 
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
