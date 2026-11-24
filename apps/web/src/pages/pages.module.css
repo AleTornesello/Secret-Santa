@@ -77,18 +77,15 @@
 
 .form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
 .inline {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: var(--space-3);
-}
-
-.inline > button {
-  margin-top: 1.75rem;
 }
 
 .fieldset {
@@ -184,12 +181,13 @@
   font-size: var(--text-sm);
 }
 
-@media (max-width: 30rem) {
+/* Mobile first: the base styles above are the phone layout; wider screens add to them. */
+@media (min-width: 30rem) {
   .inline {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .inline > button {
-    margin-top: 0;
+    margin-top: 1.75rem;
   }
 }
