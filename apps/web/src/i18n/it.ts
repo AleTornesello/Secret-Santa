@@ -85,7 +85,30 @@ export const it: Messages = {
     "Questo link mostra il tuo destinatario. Tienilo per te: è l'unico modo per rientrare da un altro dispositivo.",
   'private.copy': 'Copia link privato',
 
-  'soon.join': 'Unirsi a un gruppo',
+  'join.eyebrow': 'Sei tra gli invitati',
+  'join.budget': (amount: string) => `Budget per regalo: ${amount}`,
+  'join.pick': 'Chi sei?',
+  'join.pickHint': 'Scegli il tuo nome. I nomi già presi sono in grigio.',
+  'join.takenLabel': 'già preso',
+  'join.continue': 'Continua',
+  'join.confirmTitle': (name: string) => `Sei ${name}?`,
+  'join.confirmBody':
+    'Confermando, questo nome diventa tuo su questo dispositivo. Sceglilo solo se sei davvero tu.',
+  'join.confirmYes': (name: string) => `Sì, sono ${name}`,
+  'join.back': 'Scegli un altro nome',
+  'join.joining': 'Un attimo…',
+  'join.doneTitle': (name: string) => `Ci sei, ${name}!`,
+  'join.doneBody': 'Il tuo destinatario comparirà qui appena tutti avranno scelto il proprio nome.',
+  'join.openMine': 'Vai al mio destinatario',
+  'join.alreadyJoined': (name: string) =>
+    `Questo dispositivo si è già unito a questo gruppo come ${name}.`,
+  'join.notFound': "Nessun gruppo ha questo codice. Controllalo con l'organizzatore.",
+  'join.closed':
+    "Le iscrizioni a questo gruppo sono chiuse. Chiedi all'organizzatore di crearne uno nuovo.",
+  'join.drawn': 'Si sono già uniti tutti a questo gruppo e i nomi sono stati estratti.',
+  'join.taken': 'Qualcuno ha appena scelto quel nome. Scegli di nuovo il tuo.',
+  'join.full':
+    "Tutti i nomi sono presi. Se il tuo è stato preso per errore, avvisa l'organizzatore.",
   'soon.mine': 'Il tuo destinatario',
   'soon.body': 'Questa schermata arriva con il prossimo aggiornamento.',
 

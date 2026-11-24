@@ -51,9 +51,12 @@ for (const width of [320, 360, 390]) {
         );
         expect(overflow, 'no horizontal scrolling').toBeLessThanOrEqual(0);
 
-        // Every button, field and select is at least 40px tall, so it is easy to tap.
+        // Every button, field and select is at least 40px tall, so it is easy to tap. Checkboxes
+        // and radios are tapped through their label, so the label is measured instead.
         const small = await page
-          .locator('button, input:not([type="checkbox"]), select, textarea')
+          .locator(
+            'button, input:not([type="checkbox"]):not([type="radio"]), select, textarea, label:has(input[type="checkbox"], input[type="radio"])',
+          )
           .evaluateAll((elements) =>
             elements
               .filter((el) => (el as HTMLElement).offsetParent !== null)
