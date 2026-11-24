@@ -1,0 +1,46 @@
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-lg);
+}
+
+.label {
+  margin: 0;
+  font-size: var(--text-sm);
+  opacity: 0.85;
+}
+
+.code {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+}
+
+.link {
+  margin: 0 0 var(--space-4);
+  overflow-wrap: anywhere;
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.onGreen {
+  color: var(--color-white);
+}
+
+.qr {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  margin: var(--space-6) 0 0;
+  font-size: var(--text-sm);
+}
+
+.qr svg {
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+}

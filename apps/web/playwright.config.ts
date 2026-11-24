@@ -16,5 +16,7 @@ export default defineConfig({
     command: `pnpm build && pnpm preview --port ${port} --strictPort`,
     port,
     reuseExistingServer: !process.env.CI,
+    // The screens' tests answer the API calls themselves (see e2e/mockApi.ts).
+    env: { VITE_SUPABASE_URL: 'http://api.test', VITE_SUPABASE_ANON_KEY: '' },
   },
 });
