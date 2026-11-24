@@ -3,7 +3,7 @@ export function generateToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
   const base64 = btoa(binary).replaceAll('+', '-').replaceAll('/', '_');
   // Strip the padding without a regular expression: at most two trailing '='.
   let end = base64.length;
