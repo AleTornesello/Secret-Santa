@@ -1,0 +1,62 @@
+.ornament {
+  display: inline-block;
+  line-height: 0;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.string {
+  stroke: var(--color-ink-muted);
+  stroke-width: 1.2;
+  opacity: 0.5;
+}
+
+.loop {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 2.5;
+}
+
+.cap {
+  fill: var(--color-gold);
+}
+
+/* Pendulum swing around the point where the string meets the loop. */
+.swing {
+  transform-box: view-box;
+  transform-origin: 50px 34px;
+  animation: swing 4.8s ease-in-out infinite;
+  animation-delay: var(--ornament-delay, 0s);
+}
+
+/* The pattern slides one period (40 units) to the left and loops, like a turning sphere. */
+.spin {
+  animation: spin 6s linear infinite;
+  animation-delay: var(--ornament-delay, 0s);
+}
+
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(6deg);
+  }
+  75% {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-40px);
+  }
+}

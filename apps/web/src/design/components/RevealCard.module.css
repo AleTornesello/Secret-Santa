@@ -1,0 +1,80 @@
+.scene {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 3 / 4;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 800ms var(--ease-out);
+}
+
+.card:disabled {
+  cursor: default;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lifted);
+  backface-visibility: hidden;
+  text-align: center;
+}
+
+.front {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgb(255 255 255 / 10%) 18px 36px),
+    var(--color-red-700);
+  color: var(--color-white);
+}
+
+.card:disabled:not(.flipped) .front {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgb(255 255 255 / 10%) 18px 36px),
+    var(--color-green-700);
+}
+
+.back {
+  background: var(--color-surface);
+  transform: rotateY(180deg);
+}
+
+.icon {
+  font-size: 3rem;
+}
+
+.prompt {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.title {
+  color: var(--color-text-muted);
+}
+
+.recipient {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  overflow-wrap: anywhere;
+}
