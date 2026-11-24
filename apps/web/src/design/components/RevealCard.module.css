@@ -1,62 +1,108 @@
 .scene {
-  perspective: 1000px;
   width: 100%;
   max-width: 340px;
   aspect-ratio: 3 / 4;
 }
 
-.card {
+.lockedCard,
+.gift {
   position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 800ms var(--ease-out);
-}
-
-.card:disabled {
-  cursor: default;
-}
-
-.flipped {
-  transform: rotateY(180deg);
-}
-
-.face {
-  position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
+  width: 100%;
+  height: 100%;
   padding: var(--space-6);
+  border: 0;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lifted);
-  backface-visibility: hidden;
+  color: inherit;
   text-align: center;
 }
 
-.front {
-  background:
-    repeating-linear-gradient(45deg, transparent 0 18px, rgb(255 255 255 / 10%) 18px 36px),
-    var(--color-red-700);
-  color: var(--color-white);
-}
-
-.card:disabled:not(.flipped) .front {
+/* Before everyone has joined: a striped card with a lock. */
+.lockedCard {
   background:
     repeating-linear-gradient(45deg, transparent 0 18px, rgb(255 255 255 / 10%) 18px 36px),
     var(--color-green-700);
+  box-shadow: var(--shadow-lifted);
+  color: var(--color-white);
+  cursor: default;
 }
 
-.back {
-  background: var(--color-surface);
-  transform: rotateY(180deg);
+/* Once everyone has joined: a wrapped gift box on a soft card. */
+.gift {
+  background: var(--color-primary-soft);
+  box-shadow: var(--shadow-lifted);
+  cursor: pointer;
+}
+
+.gift:disabled {
+  cursor: default;
+}
+
+.box {
+  width: 75%;
+  overflow: visible;
+  animation: wiggle 3.2s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.gift:hover:not(:disabled) .box {
+  animation-duration: 1.2s;
+}
+
+.lid,
+.body {
+  transform-box: fill-box;
+  transition:
+    transform 700ms var(--ease-out),
+    opacity 500ms var(--ease-out);
+}
+
+.lid {
+  transform-origin: 20% 100%;
+}
+
+.body {
+  transform-origin: 50% 100%;
+}
+
+.opened .box {
+  animation: none;
+}
+
+.opened .lid {
+  transform: translate(-18px, -70px) rotate(-24deg);
+  opacity: 0;
+}
+
+.opened .body {
+  transform: scale(0.85);
+  opacity: 0;
+  transition-delay: 250ms;
+}
+
+.reveal {
+  position: absolute;
+  inset: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms var(--ease-out) 450ms;
+}
+
+.opened .reveal {
+  opacity: 1;
+}
+
+.opened .prompt {
+  opacity: 0;
 }
 
 .icon {
@@ -66,6 +112,11 @@
 .prompt {
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
+  transition: opacity 300ms var(--ease-out);
+}
+
+.gift .prompt {
+  color: var(--color-primary);
 }
 
 .title {
@@ -77,4 +128,24 @@
   font-weight: var(--weight-bold);
   color: var(--color-accent);
   overflow-wrap: anywhere;
+}
+
+@keyframes wiggle {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0deg);
+  }
+  76% {
+    transform: rotate(-4deg);
+  }
+  82% {
+    transform: rotate(4deg);
+  }
+  88% {
+    transform: rotate(-2deg);
+  }
+  94% {
+    transform: rotate(2deg);
+  }
 }

@@ -45,3 +45,9 @@
 .error {
   color: var(--color-error);
 }
+
+.textarea {
+  min-height: 160px;
+  line-height: 1.6;
+  resize: vertical;
+}

@@ -1,6 +1,72 @@
 .card {
-  background: var(--color-surface);
+  position: relative;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
   padding: var(--space-6);
+}
+
+.plain {
+  background: var(--color-surface);
+}
+
+/* Snow card: matte green with white text; two layers of flakes fall at different speeds. */
+.snow {
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--color-green-700);
+  color: var(--color-white);
+}
+
+.snow::before,
+.snow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+
+/* Near flakes: larger, faster. */
+.snow::before {
+  background-image:
+    radial-gradient(circle at 20px 30px, rgb(255 255 255 / 85%) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 90px 80px, rgb(255 255 255 / 70%) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 150px 20px, rgb(255 255 255 / 80%) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 60px 140px, rgb(255 255 255 / 65%) 0 2px, transparent 2.5px);
+  background-size: 180px 180px;
+  animation: snowfall-near 9s linear infinite;
+}
+
+/* Far flakes: smaller, slower, fainter. */
+.snow::after {
+  background-image:
+    radial-gradient(circle at 10px 10px, rgb(255 255 255 / 45%) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 70px 50px, rgb(255 255 255 / 40%) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 40px 95px, rgb(255 255 255 / 45%) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 100px 75px, rgb(255 255 255 / 35%) 0 1px, transparent 1.5px);
+  background-size: 120px 120px;
+  animation: snowfall-far 16s linear infinite;
+}
+
+.content {
+  position: relative;
+}
+
+@keyframes snowfall-near {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 180px;
+  }
+}
+
+@keyframes snowfall-far {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -20px 120px;
+  }
 }

@@ -14,6 +14,9 @@ test('reveal card unlocks only when everyone has joined', async ({ page }) => {
   await page.getByRole('button', { name: 'One joins' }).click();
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '5');
 
-  await page.getByRole('button', { name: /Tap to reveal/ }).click();
+  const gift = page.getByRole('button', { name: /Tap to reveal/ });
+  await expect(gift).toHaveAttribute('data-state', 'wrapped');
+  await gift.click();
+  await expect(page.locator('[data-state="opened"]')).toBeVisible();
   await expect(page.getByText('Giulia', { exact: true }).last()).toBeVisible();
 });

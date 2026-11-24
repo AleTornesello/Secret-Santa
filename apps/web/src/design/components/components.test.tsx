@@ -1,6 +1,15 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Button, JoinCounter, Ornament, ParticipantChip, RevealCard, TextField } from '.';
+import {
+  Button,
+  Card,
+  JoinCounter,
+  Ornament,
+  ParticipantChip,
+  RevealCard,
+  TextAreaField,
+  TextField,
+} from '.';
 
 afterEach(cleanup);
 
@@ -74,10 +83,24 @@ describe('RevealCard', () => {
     expect(screen.getByText('Waiting for everyone')).toBeDefined();
   });
 
-  it('reveals the recipient on click once unlocked', () => {
+  it('shows a locked card, not the gift box, while locked', () => {
+    render(<RevealCard locked recipient="Giulia" {...texts} />);
+    expect(screen.getByRole('button').getAttribute('data-state')).toBe('locked');
+  });
+
+  it('shows a wrapped gift box once unlocked, without the recipient', () => {
     render(<RevealCard locked={false} recipient="Giulia" {...texts} />);
+    const gift = screen.getByRole('button', { name: /Tap to reveal/ });
+    expect(gift.getAttribute('data-state')).toBe('wrapped');
+    expect(gift).toHaveProperty('disabled', false);
     expect(screen.queryByText('Giulia')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /Tap to reveal/ }));
+  });
+
+  it('opens the gift box on click and reveals the recipient', () => {
+    render(<RevealCard locked={false} recipient="Giulia" {...texts} />);
+    const gift = screen.getByRole('button', { name: /Tap to reveal/ });
+    fireEvent.click(gift);
+    expect(gift.getAttribute('data-state')).toBe('opened');
     expect(screen.getByText('Giulia')).toBeDefined();
     expect(screen.getByText('You are giving a gift to')).toBeDefined();
   });
@@ -100,5 +123,40 @@ describe('Ornament', () => {
     );
     const ids = Array.from(container.querySelectorAll('clipPath')).map((el) => el.id);
     expect(new Set(ids).size).toBe(2);
+  });
+});
+
+describe('Card', () => {
+  it('renders the snow variant with its content', () => {
+    render(<Card variant="snow">Hello</Card>);
+    expect(screen.getByText('Hello').closest('[data-variant]')?.getAttribute('data-variant')).toBe(
+      'snow',
+    );
+  });
+});
+
+describe('Ornament shapes', () => {
+  it.each(['bauble', 'gift', 'candyCane'] as const)('renders a %s', (shape) => {
+    const { container } = render(<Ornament shape={shape} />);
+    const root = container.firstElementChild;
+    expect(root?.getAttribute('data-shape')).toBe(shape);
+    expect(root?.querySelector('svg')).not.toBeNull();
+  });
+});
+
+describe('TextAreaField', () => {
+  it('is a labelled multi-line field with hint and error', () => {
+    render(<TextAreaField label="Names" hint="One name per line" error="Add at least 3 names" />);
+    const area = screen.getByLabelText('Names');
+    expect(area.tagName).toBe('TEXTAREA');
+    expect(area.getAttribute('aria-invalid')).toBe('true');
+    expect(area.getAttribute('rows')).toBe('6');
+  });
+
+  it('reports typed text', () => {
+    const onChange = vi.fn();
+    render(<TextAreaField label="Names" onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText('Names'), { target: { value: 'Anna\nMarco' } });
+    expect(onChange).toHaveBeenCalledOnce();
   });
 });

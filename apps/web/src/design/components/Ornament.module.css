@@ -60,3 +60,75 @@
     transform: translateX(-40px);
   }
 }
+
+/* Gift box: a gentle twist in perspective makes the isometric box read as turning. */
+.twist {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: twist 5.5s ease-in-out infinite;
+  animation-delay: var(--ornament-delay, 0s);
+}
+
+@keyframes twist {
+  0%,
+  100% {
+    transform: skewY(0deg) scaleX(1);
+  }
+  25% {
+    transform: skewY(-4deg) scaleX(0.92);
+  }
+  75% {
+    transform: skewY(4deg) scaleX(0.92);
+  }
+}
+
+/* Candy cane: swings around its hook; the stripes travel down the stick. */
+.swingCane {
+  transform-box: view-box;
+  transform-origin: 57px 40px;
+  animation: swing 4.2s ease-in-out infinite;
+  animation-delay: var(--ornament-delay, 0s);
+}
+
+.caneShadow,
+.caneBase,
+.caneStripes,
+.caneShine {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.caneShadow {
+  stroke: #000;
+  stroke-opacity: 0.12;
+  stroke-width: 13;
+  transform: translate(2px, 1px);
+}
+
+.caneBase {
+  stroke: var(--color-white);
+  stroke-width: 12;
+}
+
+.caneStripes {
+  stroke-linecap: butt;
+  stroke-width: 12;
+  stroke-dasharray: 7 9;
+  animation: stripes 1.6s linear infinite;
+  animation-delay: var(--ornament-delay, 0s);
+}
+
+.caneShine {
+  stroke: var(--color-white);
+  stroke-opacity: 0.45;
+  stroke-width: 2.5;
+}
+
+@keyframes stripes {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -16;
+  }
+}

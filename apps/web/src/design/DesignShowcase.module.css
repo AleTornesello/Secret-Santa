@@ -83,3 +83,17 @@
 .revealCard .heading {
   align-self: flex-start;
 }
+
+.snowText {
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-lg);
+}
+
+.onSnow {
+  border-color: var(--color-white);
+  color: var(--color-white);
+}
+
+.onSnow:hover:not(:disabled) {
+  background: rgb(255 255 255 / 15%);
+}
