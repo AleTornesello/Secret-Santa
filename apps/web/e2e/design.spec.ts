@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-test('home page loads', async ({ page }) => {
-  await page.goto('/');
+test('design showcase loads', async ({ page }) => {
+  await page.goto('/#/design');
   await expect(page.getByRole('heading', { name: 'Secret Santa' })).toBeVisible();
 });
 
 test('reveal card unlocks only when everyone has joined', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/design');
   const card = page.getByRole('button', { name: /Waiting for everyone to join/ });
   await expect(card).toBeDisabled();
 

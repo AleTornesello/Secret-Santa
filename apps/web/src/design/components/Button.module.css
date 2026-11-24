@@ -15,7 +15,7 @@
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translateY(2px) scale(0.98);
 }
 
 .button:disabled {
@@ -24,7 +24,8 @@
 }
 
 .primary {
-  background: var(--color-primary);
+  background: linear-gradient(180deg, #33855a, var(--color-primary));
+  box-shadow: 0 4px 0 var(--color-green-900);
   color: var(--color-white);
 }
 
@@ -32,8 +33,19 @@
   background: var(--color-primary-hover);
 }
 
+.gold {
+  background: linear-gradient(180deg, #f3cf6f, var(--color-gold-bright));
+  box-shadow: 0 4px 0 #a9822a;
+  color: var(--color-green-900);
+}
+
+.gold:hover:not(:disabled) {
+  background: var(--color-gold-bright);
+}
+
 .accent {
-  background: var(--color-accent);
+  background: linear-gradient(180deg, #cf4a42, var(--color-accent));
+  box-shadow: 0 4px 0 #7d2420;
   color: var(--color-white);
 }
 

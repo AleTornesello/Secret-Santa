@@ -25,6 +25,16 @@ pnpm e2e           # Playwright end-to-end tests
 pnpm format        # Prettier
 ```
 
+## Web app
+
+Hash routes (GitHub Pages has no deep-link fallback): `#/` home, `#/new` create a group,
+`#/g/<id>` organizer dashboard, `#/join/<code>` and `#/g/<id>/me` (coming in M6 and M7),
+`#/design` the design system. Strings are in `apps/web/src/i18n` (Italian and English); the
+groups a device belongs to and their tokens live only in that device's localStorage.
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (for example in `apps/web/.env.local`) to
+point the app at a Supabase project; `pnpm stack:start` prints the local values.
+
 ## Database
 
 The Supabase CLI is a dev dependency and needs Docker.

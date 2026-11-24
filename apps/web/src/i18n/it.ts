@@ -1,0 +1,104 @@
+import type { Messages } from './en';
+
+export const it: Messages = {
+  appName: 'Secret Santa',
+  language: 'Lingua',
+  loading: 'Caricamento…',
+  backHome: 'Torna alla home',
+  tryAgain: 'Riprova',
+
+  'home.tagline':
+    'Estrai i nomi con gli amici. Ognuno sceglie il proprio nome, nessuno vede gli altri.',
+  'home.create': 'Crea un gruppo',
+  'home.yourGroups': 'I tuoi gruppi su questo dispositivo',
+  'home.noGroups': 'Qui compariranno i gruppi che crei o a cui ti unisci da questo dispositivo.',
+  'home.roleOrganizer': 'Organizzatore',
+  'home.rolePlayer': 'Partecipante',
+  'home.roleBoth': 'Organizzatore e partecipante',
+  'home.openDashboard': 'Pannello',
+  'home.openMine': 'Il mio destinatario',
+  'home.joinTitle': 'Unisciti con un codice',
+  'home.joinHint':
+    "Il codice di 8 caratteri dell'organizzatore, oppure inquadra il suo codice QR con la fotocamera.",
+  'home.codeLabel': 'Codice del gruppo',
+  'home.join': 'Unisciti',
+  'home.codeInvalid': 'I codici hanno 8 lettere e cifre, come ABCD-2345.',
+
+  'new.title': 'Crea un gruppo',
+  'new.name': 'Nome del gruppo',
+  'new.namePlaceholder': 'Natale in famiglia 2026',
+  'new.budget': 'Budget per regalo (facoltativo)',
+  'new.budgetHint': 'In euro, per esempio 20 o 25,50.',
+  'new.names': 'Nomi',
+  'new.namesHint': (count: number) =>
+    `Un nome per riga, ${count} ${count === 1 ? 'nome' : 'nomi'}. Da 3 a 100.`,
+  'new.playing': 'Partecipo anche io',
+  'new.playingHint': 'Lascialo vuoto se organizzi soltanto.',
+  'new.whoAmI': 'Quale sei tu?',
+  'new.chooseYourName': 'Scegli il tuo nome',
+  'new.submit': 'Crea il gruppo',
+  'new.submitting': 'Creazione…',
+  'new.errorName': 'Dai un nome al gruppo, fino a 60 caratteri.',
+  'new.errorBudget':
+    'Inserisci un importo maggiore di 0 con al massimo 2 decimali, o lascia vuoto.',
+  'new.errorTooFew': 'Aggiungi almeno 3 nomi.',
+  'new.errorTooMany': 'Un gruppo può avere al massimo 100 nomi.',
+  'new.errorLong': (name: string) => `"${name}" supera i 40 caratteri.`,
+  'new.errorDuplicate': (name: string) => `"${name}" compare più di una volta.`,
+  'new.errorOwn': 'Scegli quale nome è il tuo.',
+
+  'dash.title': "Pannello dell'organizzatore",
+  'dash.budget': (amount: string) => `Budget: ${amount}`,
+  'dash.joined': (joined: number, total: number) => `${joined} su ${total} si sono uniti`,
+  'dash.refresh': 'Aggiorna',
+  'dash.closesIn': (time: string) => `Le iscrizioni chiudono tra ${time}`,
+  'dash.closed': 'Le iscrizioni sono chiuse. Se qualcuno è rimasto fuori, crea un nuovo gruppo.',
+  'dash.drawn': 'Si sono uniti tutti e i nomi sono stati estratti.',
+  'dash.participants': 'Chi si è unito',
+  'dash.joinedLabel': 'unito',
+  'dash.notJoinedLabel': 'non ancora unito',
+  'dash.release': 'Libera questo nome',
+  'dash.releaseConfirm': (name: string) =>
+    `Liberare "${name}" perché qualcun altro possa sceglierlo?`,
+  'dash.releaseYes': 'Sì, liberalo',
+  'dash.cancel': 'Annulla',
+  'dash.notFound': 'Questo gruppo non esiste più, o questo dispositivo non ha accesso.',
+  'dash.noToken':
+    'Questo dispositivo non ha accesso da organizzatore a questo gruppo. Apri il tuo link privato.',
+  'dash.myRecipient': 'Vedi il mio destinatario',
+
+  'share.title': 'Invita i tuoi amici',
+  'share.code': 'Codice del gruppo',
+  'share.link': 'Link per unirsi',
+  'share.copyLink': 'Copia link',
+  'share.copied': 'Copiato',
+  'share.share': 'Condividi',
+  'share.shareText': (group: string) =>
+    `Unisciti a "${group}" su Secret Santa e scegli il tuo nome:`,
+  'share.qr': 'Oppure inquadra questo codice QR',
+
+  'private.titleOrganizer': 'Salva il tuo link da organizzatore',
+  'private.titlePlayer': 'Salva il tuo link da partecipante',
+  'private.organizer':
+    'Questo link è il tuo accesso da organizzatore. Tienilo per te: chi lo ha può gestire il gruppo.',
+  'private.player':
+    "Questo link mostra il tuo destinatario. Tienilo per te: è l'unico modo per rientrare da un altro dispositivo.",
+  'private.copy': 'Copia link privato',
+
+  'soon.join': 'Unirsi a un gruppo',
+  'soon.mine': 'Il tuo destinatario',
+  'soon.body': 'Questa schermata arriva con il prossimo aggiornamento.',
+
+  'error.invalid_input': 'Qualcosa nel modulo non è valido. Controlla e riprova.',
+  'error.unauthorized': 'Questo dispositivo non ha accesso.',
+  'error.not_found': 'Non trovato.',
+  'error.already_taken': 'Quel nome è appena stato scelto.',
+  'error.group_drawn': 'I nomi sono già stati estratti.',
+  'error.joining_closed': 'Le iscrizioni sono chiuse.',
+  'error.rate_limited': 'Troppi tentativi. Aspetta un minuto e riprova.',
+  'error.internal': 'Qualcosa è andato storto da parte nostra. Riprova.',
+  'error.network': 'Impossibile raggiungere il server. Controlla la connessione e riprova.',
+
+  'time.hoursMinutes': (hours: number, minutes: number) => `${hours} h ${minutes} min`,
+  'time.minutes': (minutes: number) => `${minutes} min`,
+};

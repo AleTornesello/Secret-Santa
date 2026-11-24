@@ -5,8 +5,10 @@ import { App } from './App';
 afterEach(cleanup);
 
 describe('App', () => {
-  it('renders the title', () => {
-    render(<App />);
+  it('starts on the home page', () => {
+    window.location.hash = '';
+    render(<App locale="it" />);
     expect(screen.getByRole('heading', { name: 'Secret Santa' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Crea un gruppo' })).toBeDefined();
   });
 });
