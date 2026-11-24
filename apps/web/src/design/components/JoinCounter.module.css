@@ -1,0 +1,28 @@
+.counter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+
+.track {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-frost);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-red-500);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.complete {
+  background: var(--color-green-500);
+}

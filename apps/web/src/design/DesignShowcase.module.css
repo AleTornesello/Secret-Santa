@@ -1,0 +1,99 @@
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-12);
+}
+
+.hero {
+  text-align: center;
+  padding-bottom: var(--space-8);
+}
+
+.ornaments {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(var(--space-4), 5vw, var(--space-8));
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  margin: var(--space-2) 0 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.heading {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatchColor {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+}
+
+.revealCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.revealCard .heading {
+  align-self: flex-start;
+}
+
+.snowText {
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-lg);
+}
+
+.onSnow {
+  border-color: var(--color-white);
+  color: var(--color-white);
+}
+
+.onSnow:hover:not(:disabled) {
+  background: rgb(255 255 255 / 15%);
+}

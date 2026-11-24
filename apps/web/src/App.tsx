@@ -1,13 +1,6 @@
-import { GROUP_SIZE } from '@secret-santa/shared';
+import { DesignShowcase } from './design/DesignShowcase';
 
-/** Placeholder home page; the real screens arrive in milestones M5 to M7. */
+/** Until the real screens arrive (milestones M5 to M7), the home page shows the design system. */
 export function App() {
-  return (
-    <main>
-      <h1>Secret Santa</h1>
-      <p>
-        Groups of {GROUP_SIZE.min} to {GROUP_SIZE.max} friends. Coming soon.
-      </p>
-    </main>
-  );
+  return <DesignShowcase />;
 }
