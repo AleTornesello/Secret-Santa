@@ -23,6 +23,17 @@
   --color-ink: #26332b;
   --color-ink-muted: #5d6a61;
   --color-gold: #d8b76a;
+  /* Festive brights: for stripes, stars and glows. Text on them stays dark or uses the 700s. */
+  --color-holly: #2f7d4f;
+  --color-berry: #c8423b;
+  --color-gold-bright: #e8b84a;
+  --color-candy-stripe: repeating-linear-gradient(
+    -45deg,
+    var(--color-berry) 0 10px,
+    var(--color-white) 10px 20px,
+    var(--color-holly) 20px 30px,
+    var(--color-white) 30px 40px
+  );
 
   /* Roles */
   --color-bg: var(--color-snow);
@@ -30,13 +41,13 @@
   --color-text: var(--color-ink);
   --color-text-muted: var(--color-ink-muted);
   --color-border: #dfe5df;
-  --color-primary: var(--color-green-700);
+  --color-primary: var(--color-holly);
   --color-primary-hover: var(--color-green-900);
   --color-primary-soft: var(--color-green-100);
-  --color-accent: var(--color-red-700);
+  --color-accent: #b8352f;
   --color-accent-hover: #873b36;
   --color-accent-soft: var(--color-red-100);
-  --color-focus: var(--color-gold);
+  --color-focus: var(--color-gold-bright);
   --color-error: var(--color-red-700);
 
   /* Type */

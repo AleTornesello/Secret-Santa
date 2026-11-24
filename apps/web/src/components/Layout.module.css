@@ -1,7 +1,50 @@
 .shell {
+  position: relative;
   min-height: 100vh;
-  background: var(--color-bg);
+  overflow-x: clip;
   color: var(--color-text);
+  /* Warm cream lit by a red glow at the top and a green one at the bottom. */
+  background:
+    radial-gradient(60rem 30rem at 15% -10%, rgb(200 66 59 / 16%), transparent 70%),
+    radial-gradient(50rem 30rem at 100% 110%, rgb(47 125 79 / 18%), transparent 70%),
+    var(--color-bg);
+}
+
+.stripe {
+  height: 10px;
+  background: var(--color-candy-stripe);
+}
+
+/* Gentle snow over the whole page, behind the content and never in the way of taps. */
+.snow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 30px 40px, rgb(200 66 59 / 22%) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 140px 90px, rgb(47 125 79 / 22%) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 220px 20px, rgb(216 183 106 / 45%) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 80px 170px, rgb(47 125 79 / 18%) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 190px 200px, rgb(200 66 59 / 18%) 0 2px, transparent 2.5px);
+  background-size: 260px 240px;
+  animation: confetti-fall 22s linear infinite;
+}
+
+@keyframes confetti-fall {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 240px;
+  }
+}
+
+.header,
+.main,
+.footer {
+  position: relative;
+  z-index: 1;
 }
 
 .header {
@@ -18,18 +61,19 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-primary);
+  color: var(--color-accent);
+  font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   text-decoration: none;
 }
 
 .language select {
-  border: 1px solid var(--color-border);
+  min-height: 40px;
+  border: 2px solid var(--color-gold);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
-  min-height: 40px;
   padding: var(--space-2) var(--space-3);
   font: inherit;
   font-size: var(--text-sm);
@@ -42,7 +86,16 @@
   gap: var(--space-6);
   max-width: 44rem;
   margin: 0 auto;
-  padding: 0 var(--space-4) var(--space-12);
+  padding: 0 var(--space-4) var(--space-8);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-8);
 }
 
 .srOnly {

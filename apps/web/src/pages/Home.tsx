@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { isValidJoinCode, normalizeJoinCode } from '@secret-santa/shared';
-import { Button, Card, TextField } from '../design/components';
+import { Button, Card, Ornament, TextField } from '../design/components';
 import { useI18n } from '../i18n/I18nProvider';
 import { listDeviceGroups, type DeviceGroup } from '../lib/deviceGroups';
 import styles from './pages.module.css';
@@ -30,13 +30,19 @@ export function Home() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h1 className={styles.title}>{t.appName}</h1>
-        <p className={styles.lead}>{t['home.tagline']}</p>
-        <Link to="/new" className={styles.primaryLink}>
+      <Card variant="snow" className={styles.heroCard}>
+        <div className={styles.heroOrnaments} aria-hidden="true">
+          <Ornament color="red" size={56} />
+          <Ornament shape="gift" color="white" size={52} delay={0.8} />
+          <Ornament shape="candyCane" color="red" size={44} delay={1.6} />
+          <Ornament color="white" size={48} delay={2.4} />
+        </div>
+        <h1 className={styles.heroTitle}>{t.appName}</h1>
+        <p className={styles.heroLead}>{t['home.tagline']}</p>
+        <Link to="/new" className={styles.goldLink}>
           {t['home.create']}
         </Link>
-      </section>
+      </Card>
 
       <Card>
         <h2 className={styles.heading}>{t['home.joinTitle']}</h2>

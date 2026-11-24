@@ -6,7 +6,18 @@
 }
 
 .plain {
+  overflow: hidden;
   background: var(--color-surface);
+  padding-top: calc(var(--space-6) + 6px);
+}
+
+/* A strip of candy-cane ribbon along the top of every plain card. */
+.plain::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: var(--color-candy-stripe);
 }
 
 /* Snow card: matte green with white text; two layers of flakes fall at different speeds. */

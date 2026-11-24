@@ -19,11 +19,12 @@
 
 .taken {
   background: var(--color-primary-soft);
-  border-color: var(--color-green-300);
+  border-color: var(--color-holly);
 }
 
 .taken .dot {
-  background: var(--color-green-500);
+  background: var(--color-holly);
+  box-shadow: 0 0 0 3px rgb(47 125 79 / 20%);
 }
 
 .you {
