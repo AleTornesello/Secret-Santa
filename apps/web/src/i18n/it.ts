@@ -107,8 +107,19 @@ export const it: Messages = {
   'join.taken': 'Qualcuno ha appena scelto quel nome. Scegli di nuovo il tuo.',
   'join.full':
     "Tutti i nomi sono presi. Se il tuo è stato preso per errore, avvisa l'organizzatore.",
-  'soon.mine': 'Il tuo destinatario',
-  'soon.body': 'Questa schermata arriva con il prossimo aggiornamento.',
+
+  'mine.eyebrow': (name) => `Ciao ${name}, ecco il tuo regalo`,
+  'mine.waiting':
+    'In attesa che tutti scelgano il proprio nome. Questa pagina si aggiorna da sola.',
+  'mine.ready': 'Ci sono tutti e i nomi sono stati estratti. Apri il tuo regalo!',
+  'mine.locked': 'Il regalo si apre quando tutti si sono uniti',
+  'mine.drawing': 'Estrazione in corso…',
+  'mine.tap': 'Tocca per aprire il regalo',
+  'mine.revealed': 'Sei il Babbo Natale segreto di',
+  'mine.dashboard': 'Pannello organizzatore',
+  'mine.notFound': 'Questo gruppo non esiste più, o questo dispositivo non è un partecipante.',
+  'mine.noToken':
+    'Questo dispositivo non si è unito a questo gruppo. Apri il tuo link privato da partecipante.',
 
   'error.invalid_input': 'Qualcosa nel modulo non è valido. Controlla e riprova.',
   'error.unauthorized': 'Questo dispositivo non ha accesso.',

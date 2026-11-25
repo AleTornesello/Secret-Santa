@@ -38,6 +38,9 @@ importers:
       '@secret-santa/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@supabase/supabase-js':
+        specifier: 2.119.2
+        version: 2.119.2
       qrcode.react:
         specifier: 4.2.0
         version: 4.2.0(react@19.3.1)

@@ -28,12 +28,14 @@ pnpm format        # Prettier
 ## Web app
 
 Hash routes (GitHub Pages has no deep-link fallback): `#/` home, `#/new` create a group,
-`#/g/<id>` organizer dashboard, `#/join/<code>` pick your name, `#/g/<id>/me` (coming in M7),
+`#/g/<id>` organizer dashboard, `#/join/<code>` pick your name, `#/g/<id>/me` your recipient,
 `#/design` the design system. Strings are in `apps/web/src/i18n` (Italian and English); the
 groups a device belongs to and their tokens live only in that device's localStorage.
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (for example in `apps/web/.env.local`) to
-point the app at a Supabase project; `pnpm stack:start` prints the local values.
+point the app at a Supabase project; `pnpm stack:start` prints the local values. The dashboard
+and the player page subscribe to the group's Realtime channel with that public key, so counts
+and the reveal update without a refresh; without the key they still refresh on focus.
 
 ## Database
 
@@ -73,4 +75,5 @@ pnpm test:integration   # API tests: against FUNCTIONS_URL if set, else the hand
 ```
 
 Without `FUNCTIONS_URL`, the integration tests need `SUPABASE_SERVICE_ROLE_KEY` from
-`supabase status`.
+`supabase status`. With `SUPABASE_ANON_KEY` set too, they also listen on the Realtime channel
+the web app uses, and check that it carries counts only.

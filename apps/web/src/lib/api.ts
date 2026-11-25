@@ -5,6 +5,7 @@ import type {
   CreateGroupResult,
   GroupPreview,
   JoinGroupResult,
+  MyAssignment,
 } from '@secret-santa/shared';
 
 export type ClientErrorCode = ApiErrorCode | 'network';
@@ -60,4 +61,6 @@ export const api = {
     call<AdminGroupView>('get-group', { groupId }, adminToken),
   releaseClaim: (groupId: string, participantId: string, adminToken: string) =>
     call<GroupPreview>('release-claim', { groupId, participantId }, adminToken),
+  getMyAssignment: (groupId: string, playerToken: string) =>
+    call<MyAssignment>('get-my-assignment', { groupId }, playerToken),
 };

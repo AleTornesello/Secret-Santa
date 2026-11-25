@@ -1,34 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type {
   AdminGroupView,
-  CreateGroupResult,
   GroupPreview,
   JoinGroupResult,
   MyAssignment,
 } from '../../../packages/shared/src/index.ts';
 import { call, newClientIp } from './client.ts';
-
-async function createGroup(names: string[], ownIndex: number | null = null) {
-  const created = await call<CreateGroupResult>(
-    'create-group',
-    { name: 'Natale', budget: 25, names, ownIndex },
-    { ip: newClientIp() },
-  );
-  expect(created.status).toBe(200);
-  const preview = await call<GroupPreview>(
-    'preview-group',
-    { code: created.body.joinCode.toLowerCase() },
-    { ip: newClientIp() },
-  );
-  expect(preview.status).toBe(200);
-  return { created: created.body, preview: preview.body };
-}
-
-function idOf(preview: GroupPreview, name: string): string {
-  const participant = preview.participants.find((p) => p.name === name);
-  if (!participant) throw new Error(`No participant ${name}`);
-  return participant.id;
-}
+import { createGroup, idOf } from './fixtures.ts';
 
 describe('the group API', () => {
   it('runs a whole group: create, join, automatic draw, reveal', async () => {
