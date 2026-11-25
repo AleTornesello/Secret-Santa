@@ -4,6 +4,7 @@ import type {
   CreateGroupInput,
   CreateGroupResult,
   GroupPreview,
+  JoinGroupResult,
 } from '@secret-santa/shared';
 
 export type ClientErrorCode = ApiErrorCode | 'network';
@@ -53,6 +54,8 @@ async function call<T>(name: string, body: unknown, token?: string): Promise<T> 
 export const api = {
   createGroup: (input: CreateGroupInput) => call<CreateGroupResult>('create-group', input),
   previewGroup: (code: string) => call<GroupPreview>('preview-group', { code }),
+  joinGroup: (code: string, participantId: string) =>
+    call<JoinGroupResult>('join-group', { code, participantId }),
   getGroup: (groupId: string, adminToken: string) =>
     call<AdminGroupView>('get-group', { groupId }, adminToken),
   releaseClaim: (groupId: string, participantId: string, adminToken: string) =>

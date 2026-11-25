@@ -1,31 +1,6 @@
 .title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  composes: star from '../design/star.module.css';
   margin: 0 0 var(--space-2);
-  font-size: var(--text-lg);
-  color: var(--color-green-900);
-}
-
-/* Same gold star as the other section headings. */
-.title::before {
-  content: '';
-  flex: none;
-  width: 1.1rem;
-  height: 1.1rem;
-  background: var(--color-gold-bright);
-  clip-path: polygon(
-    50% 0,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
 }
 
 .body {

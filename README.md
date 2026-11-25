@@ -28,7 +28,7 @@ pnpm format        # Prettier
 ## Web app
 
 Hash routes (GitHub Pages has no deep-link fallback): `#/` home, `#/new` create a group,
-`#/g/<id>` organizer dashboard, `#/join/<code>` and `#/g/<id>/me` (coming in M6 and M7),
+`#/g/<id>` organizer dashboard, `#/join/<code>` pick your name, `#/g/<id>/me` (coming in M7),
 `#/design` the design system. Strings are in `apps/web/src/i18n` (Italian and English); the
 groups a device belongs to and their tokens live only in that device's localStorage.
 

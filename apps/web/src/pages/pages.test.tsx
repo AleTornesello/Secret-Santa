@@ -1,6 +1,6 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { App } from '../App';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { go, mockApi, resetAppBetweenTests } from '../test/harness';
 import { getDeviceGroup, saveDeviceGroup } from '../lib/deviceGroups';
 
 const GROUP_ID = '6f1c1f4e-6f0a-4c4e-9a52-1f9a7e0b8c11';
@@ -22,32 +22,7 @@ const adminView = {
   ],
 };
 
-type Handler = (body: Record<string, unknown>, init: RequestInit) => unknown;
-
-function mockApi(handlers: Record<string, Handler>) {
-  const fetchMock = vi.fn(async (url: string, init: RequestInit) => {
-    const name = url.split('/').at(-1) ?? '';
-    const handler = handlers[name];
-    if (!handler) return new Response(JSON.stringify({ error: 'not_found' }), { status: 404 });
-    return new Response(JSON.stringify(handler(JSON.parse(String(init.body)), init)), {
-      status: 200,
-    });
-  });
-  vi.stubGlobal('fetch', fetchMock);
-  return fetchMock;
-}
-
-function go(path: string) {
-  window.location.hash = `#${path}`;
-  render(<App locale="en" />);
-}
-
-beforeEach(() => localStorage.clear());
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-  window.location.hash = '';
-});
+resetAppBetweenTests();
 
 describe('home', () => {
   it('lists the groups saved on this device', () => {
@@ -84,7 +59,7 @@ describe('home', () => {
 
 describe('new group', () => {
   it('creates the group, saves its tokens on this device and opens the dashboard', async () => {
-    const fetchMock = mockApi({
+    const calls = mockApi({
       'create-group': () => ({
         groupId: GROUP_ID,
         joinCode: 'ABCD2345',
@@ -104,7 +79,7 @@ describe('new group', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create the group' }));
 
     await screen.findByText('ABCD-2345');
-    const sent = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    const sent = calls[0]?.body;
     expect(sent).toEqual({
       name: 'Natale',
       budget: null,
@@ -119,17 +94,17 @@ describe('new group', () => {
   });
 
   it('shows validation errors without calling the API', () => {
-    const fetchMock = mockApi({});
+    const calls = mockApi({});
     go('/new');
     fireEvent.click(screen.getByRole('button', { name: 'Create the group' }));
     expect(screen.getByText('Add at least 3 names.')).toBeDefined();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(calls).toEqual([]);
   });
 });
 
 describe('dashboard', () => {
   it('shows the share panel, the counter and the deadline', async () => {
-    const fetchMock = mockApi({ 'get-group': () => adminView });
+    const calls = mockApi({ 'get-group': () => adminView });
     saveDeviceGroup({ groupId: GROUP_ID, name: 'Natale', adminToken: ADMIN });
     go(`/g/${GROUP_ID}`);
     await screen.findByText('ABCD-2345');
@@ -137,8 +112,7 @@ describe('dashboard', () => {
     expect(screen.getByText(/Joining closes in 5 h 1 min/)).toBeDefined();
     expect(screen.getByText('Budget: €25.00')).toBeDefined();
     expect(screen.getByText(/#\/join\/ABCD2345$/)).toBeDefined();
-    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>;
-    expect(headers.Authorization).toBe(`Bearer ${ADMIN}`);
+    expect(calls[0]?.headers.Authorization).toBe(`Bearer ${ADMIN}`);
   });
 
   it('frees a claimed name after a confirmation', async () => {
