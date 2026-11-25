@@ -1,15 +1,18 @@
 name: Deploy
 
-# Runs after CI passes on main, so only a green commit reaches production. It needs, in the
+# CI calls this after every job passes on main, so only a green commit reaches production. It
+# can also be started by hand from the Actions tab. It needs, in the
 # repository settings:
 #   secrets   SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD
 #   variables SUPABASE_PROJECT_REF, SUPABASE_URL, SUPABASE_ANON_KEY (the public key)
 # and GitHub Pages set to deploy from GitHub Actions.
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
+  workflow_call:
+    secrets:
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_DB_PASSWORD:
+        required: true
   workflow_dispatch:
 
 permissions:
@@ -21,7 +24,6 @@ concurrency:
 
 jobs:
   backend:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -30,8 +32,6 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: ./.github/actions/setup
       - name: Check the deploy settings
         run: |
@@ -39,7 +39,8 @@ jobs:
             if [ -z "${!name}" ]; then echo "::error::$name is not set in the repository settings"; exit 1; fi
           done
       - name: Apply database migrations
-        run: pnpm exec supabase db push --remote="$SUPABASE_PROJECT_REF" --password="$SUPABASE_DB_PASSWORD"
+        # The CLI reads the password from SUPABASE_DB_PASSWORD, so it never appears in a command line.
+        run: pnpm exec supabase db push --remote="$SUPABASE_PROJECT_REF"
       # The functions read SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which the platform
       # provides itself: the service role key never passes through this repository.
       - name: Deploy the Edge Functions
@@ -63,8 +64,6 @@ jobs:
       VITE_BASE_PATH: /${{ github.event.repository.name }}/
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: ./.github/actions/setup
       - name: Check the deploy settings
         run: |

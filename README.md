@@ -84,7 +84,7 @@ served Edge Functions, as in CI) or `SUPABASE_SERVICE_ROLE_KEY` to answer them i
 
 ## Deploy
 
-Every commit on `main` that passes CI is deployed by `.github/workflows/deploy.yml`: database
+Every commit on `main` that passes CI is deployed by `.github/workflows/deploy.yml`, called from CI: database
 migrations and Edge Functions to Supabase first, then the web app to GitHub Pages at
 `https://<owner>.github.io/<repository>/`. It can also be started by hand from the Actions tab.
 
