@@ -64,13 +64,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+      # CI has no terminal to confirm in: --yes answers the CLI's confirmation for hosted changes.
       - name: Apply database migrations
         # The CLI reads the password from SUPABASE_DB_PASSWORD, so it never appears in a command line.
-        run: pnpm exec supabase db push --remote="$SUPABASE_PROJECT_REF"
+        run: pnpm exec supabase db push --remote="$SUPABASE_PROJECT_REF" --yes
       # The functions read SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which the platform
       # provides itself: the service role key never passes through this repository.
       - name: Deploy the Edge Functions
-        run: pnpm exec supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api
+        run: pnpm exec supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api --yes
 
   web:
     needs: backend
