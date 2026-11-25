@@ -245,3 +245,8 @@
     margin-top: 1.75rem;
   }
 }
+
+.reveal {
+  display: flex;
+  justify-content: center;
+}

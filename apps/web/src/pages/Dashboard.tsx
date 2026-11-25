@@ -1,22 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import type { AdminGroupView, ParticipantSummary } from '@secret-santa/shared';
 import { Button, Card, ParticipantChip } from '../design/components';
 import { useI18n } from '../i18n/I18nProvider';
-import { ErrorCard } from '../components/ErrorCard';
+import { PrivateErrorCard } from '../components/ErrorCard';
 import { GroupHeader } from '../components/GroupHeader';
 import { PrivateLinkCard } from '../components/PrivateLinkCard';
 import { ShareCard } from '../components/ShareCard';
-import { api, ApiError, type ClientErrorCode } from '../lib/api';
-import { forgetDeviceGroup, getDeviceGroup, saveDeviceGroup } from '../lib/deviceGroups';
+import { api, ApiError } from '../lib/api';
+import { getDeviceGroup, saveDeviceGroup } from '../lib/deviceGroups';
 import { organizerLink, playerLink } from '../lib/links';
+import { useGroupProgress, withProgress } from '../lib/realtime';
 import { useNow } from '../lib/useNow';
+import { updateReady, usePrivateGroup } from '../lib/usePrivateGroup';
 import styles from './pages.module.css';
-
-type State =
-  | { kind: 'loading' }
-  | { kind: 'ready'; group: AdminGroupView }
-  | { kind: 'error'; code: ClientErrorCode | 'no_token' };
 
 function Deadline({ deadline }: { deadline: string }) {
   const { t } = useI18n();
@@ -31,43 +28,33 @@ function Deadline({ deadline }: { deadline: string }) {
   return <p className={styles.muted}>{t['dash.closesIn'](time)}</p>;
 }
 
+function remember(group: AdminGroupView, adminToken: string) {
+  saveDeviceGroup({ groupId: group.id, name: group.name, adminToken });
+}
+
 export function Dashboard() {
   const { groupId = '' } = useParams();
-  const [search] = useSearchParams();
-  const navigate = useNavigate();
   const { t } = useI18n();
-  const [state, setState] = useState<State>({ kind: 'loading' });
   const [confirming, setConfirming] = useState<string>();
   const [actionError, setActionError] = useState<string>();
-  const linkToken = search.get('t');
   const device = getDeviceGroup(groupId);
-  const adminToken = linkToken ?? device?.adminToken;
+  const {
+    view,
+    token: adminToken,
+    load,
+    setState,
+  } = usePrivateGroup({
+    groupId,
+    deviceToken: device?.adminToken,
+    fetch: api.getGroup,
+    remember,
+  });
 
-  const load = useCallback(() => {
-    if (!adminToken) return Promise.resolve();
-    return api.getGroup(groupId, adminToken).then(
-      (group) => {
-        setState({ kind: 'ready', group });
-        if (linkToken) {
-          // A private link: remember it on this device, then drop the token from the address bar.
-          saveDeviceGroup({ groupId, name: group.name, adminToken: linkToken });
-          navigate(`/g/${groupId}`, { replace: true });
-        }
-      },
-      (error: unknown) => {
-        const code = error instanceof ApiError ? error.code : 'internal';
-        if (code === 'not_found' && !linkToken) forgetDeviceGroup(groupId);
-        setState({ kind: 'error', code });
-      },
-    );
-  }, [adminToken, groupId, linkToken, navigate]);
-
-  useEffect(() => {
-    void load();
-    const onFocus = () => void load();
-    globalThis.addEventListener('focus', onFocus);
-    return () => globalThis.removeEventListener('focus', onFocus);
-  }, [load]);
+  // Live updates: every claim, release and the draw arrive without a refresh.
+  useGroupProgress(adminToken ? groupId : undefined, {
+    onProgress: (progress) => setState(updateReady((group) => withProgress(group, progress))),
+    onSubscribed: () => void load(),
+  });
 
   async function release(participant: ParticipantSummary) {
     if (!adminToken) return;
@@ -81,22 +68,21 @@ export function Dashboard() {
     }
   }
 
-  const view: State = adminToken ? state : { kind: 'error', code: 'no_token' };
   if (view.kind === 'loading') return <p className={styles.muted}>{t.loading}</p>;
   if (view.kind === 'error') {
-    const message =
-      view.code === 'no_token'
-        ? t['dash.noToken']
-        : view.code === 'not_found' || view.code === 'unauthorized'
-          ? t['dash.notFound']
-          : t[`error.${view.code}`];
-    const retry = view.code !== 'no_token' && view.code !== 'not_found';
-    return <ErrorCard message={message} onRetry={retry ? () => void load() : undefined} />;
+    return (
+      <PrivateErrorCard
+        code={view.code}
+        noToken={t['dash.noToken']}
+        notFound={t['dash.notFound']}
+        onRetry={() => void load()}
+      />
+    );
   }
 
-  const { group } = view;
+  const group = view.data;
   const drawn = group.status === 'drawn';
-  const playerToken = getDeviceGroup(groupId)?.playerToken;
+  const playerToken = device?.playerToken;
 
   return (
     <>

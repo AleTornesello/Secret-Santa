@@ -32,6 +32,10 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm stack:start
       - run: pnpm test:db
+      - name: Expose the local public key to the Realtime test
+        run: |
+          eval "$(pnpm exec supabase status -o env)"
+          echo "SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
       - name: Warm up the Edge Functions
         run: |
           for fn in create-group preview-group join-group get-group release-claim get-my-assignment; do

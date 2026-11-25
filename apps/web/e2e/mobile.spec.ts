@@ -1,6 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN, GROUP_ID, groupView } from './fixtures';
-const PAGES = ['/#/', '/#/new', `/#/g/${GROUP_ID}`, '/#/join/ABCD2345', '/#/design'];
+import { ADMIN, GROUP_ID, groupView, PLAYER } from './fixtures';
+
+const PAGES = [
+  '/#/',
+  '/#/new',
+  `/#/g/${GROUP_ID}`,
+  `/#/g/${GROUP_ID}/me`,
+  '/#/join/ABCD2345',
+  '/#/design',
+];
 
 async function mockApi(page: Page) {
   await page.route('http://api.test/functions/v1/*', (route) =>
@@ -10,18 +18,22 @@ async function mockApi(page: Page) {
         new Set(['Anna Maria Bianchi Rossi']),
         {
           name: 'Natale in ufficio con i colleghi del terzo piano',
+          // What get-my-assignment adds, so the player page renders too.
+          groupName: 'Natale in ufficio con i colleghi del terzo piano',
+          me: 'Anna Maria Bianchi Rossi',
+          recipient: 'Giulia',
         },
       ),
     }),
   );
   await page.goto('/#/');
   await page.evaluate(
-    ([id, token]) =>
+    ([id, adminToken, playerToken]) =>
       localStorage.setItem(
         'secret-santa:groups',
-        JSON.stringify([{ groupId: id, name: 'Natale', adminToken: token, savedAt: '' }]),
+        JSON.stringify([{ groupId: id, name: 'Natale', adminToken, playerToken, savedAt: '' }]),
       ),
-    [GROUP_ID, ADMIN],
+    [GROUP_ID, ADMIN, PLAYER],
   );
 }
 

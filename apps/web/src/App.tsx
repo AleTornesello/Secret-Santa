@@ -2,10 +2,10 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { DesignShowcase } from './design/DesignShowcase';
 import { I18nProvider, type Locale } from './i18n/I18nProvider';
-import { ComingSoon } from './pages/ComingSoon';
 import { Dashboard } from './pages/Dashboard';
 import { Home } from './pages/Home';
 import { Join } from './pages/Join';
+import { Mine } from './pages/Mine';
 import { NewGroup } from './pages/NewGroup';
 
 /**
@@ -26,7 +26,7 @@ export function App({ locale }: { locale?: Locale }) {
                   <Route path="/" element={<Home />} />
                   <Route path="/new" element={<NewGroup />} />
                   <Route path="/g/:groupId" element={<Dashboard />} />
-                  <Route path="/g/:groupId/me" element={<ComingSoon />} />
+                  <Route path="/g/:groupId/me" element={<Mine />} />
                   <Route path="/join/:code" element={<Join />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
