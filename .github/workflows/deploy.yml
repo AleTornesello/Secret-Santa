@@ -74,17 +74,16 @@ jobs:
       - name: Deploy the Edge Functions
         run: pnpm exec supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api --yes
 
-  web:
+  # Build and publish are separate jobs, as in GitHub's own Pages workflow: the artifact is
+  # finalized when the build job ends, so the publish job always finds it.
+  web-build:
     needs: backend
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
+      # configure-pages reads the site's settings.
       pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     env:
       VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
@@ -98,5 +97,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist
+
+  web:
+    needs: web-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
