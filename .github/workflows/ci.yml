@@ -24,7 +24,7 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       FUNCTIONS_URL: http://127.0.0.1:54321/functions/v1
     steps:
@@ -32,7 +32,7 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm stack:start
       - run: pnpm test:db
-      - name: Expose the local public key to the Realtime test
+      - name: Expose the local public key to the tests
         run: |
           eval "$(pnpm exec supabase status -o env)"
           echo "SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
@@ -48,3 +48,6 @@ jobs:
             [ "$status" = "204" ]
           done
       - run: pnpm test:integration
+      - run: pnpm --filter @secret-santa/web exec playwright install --with-deps chromium
+      - name: Launch test, three phones on the real stack
+        run: pnpm e2e:stack
