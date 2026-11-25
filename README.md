@@ -92,10 +92,11 @@ One-time setup:
 
 1. Create a Supabase project (region close to your players, for example Frankfurt).
 2. In the repository's **Settings → Secrets and variables → Actions**, add the secrets
-   `SUPABASE_ACCESS_TOKEN` (a personal access token from the Supabase dashboard) and
-   `SUPABASE_DB_PASSWORD`, and the variables `SUPABASE_PROJECT_REF`, `SUPABASE_URL` and
+   `SUPABASE_ACCESS_TOKEN` (a personal access token from the Supabase dashboard),
+   `SUPABASE_DB_PASSWORD` and `SUPABASE_PROJECT_REF`, and the variables `SUPABASE_URL` and
    `SUPABASE_ANON_KEY` (the project's public key; it is meant to ship in the web app).
-3. In **Settings → Pages**, set the source to **GitHub Actions**.
+
+Until all five are set, the deploy from CI skips itself and main stays green. 3. In **Settings → Pages**, set the source to **GitHub Actions**.
 
 The service role key is never stored in the repository: the platform gives it to the Edge
 Functions itself.
