@@ -21,7 +21,7 @@ pnpm dev           # start the web app
 pnpm lint          # ESLint
 pnpm typecheck     # tsc in every package
 pnpm test          # Vitest unit tests
-pnpm e2e           # Playwright end-to-end tests
+pnpm e2e           # Playwright end-to-end tests, API answered in the browser
 pnpm format        # Prettier
 ```
 
@@ -77,3 +77,25 @@ pnpm test:integration   # API tests: against FUNCTIONS_URL if set, else the hand
 Without `FUNCTIONS_URL`, the integration tests need `SUPABASE_SERVICE_ROLE_KEY` from
 `supabase status`. With `SUPABASE_ANON_KEY` set too, they also listen on the Realtime channel
 the web app uses, and check that it carries counts only.
+
+`pnpm e2e:stack` is the launch test: three phones play a whole round against the local stack,
+with real Postgres and Realtime. It needs `SUPABASE_ANON_KEY`, plus either `FUNCTIONS_URL` (the
+served Edge Functions, as in CI) or `SUPABASE_SERVICE_ROLE_KEY` to answer them in process.
+
+## Deploy
+
+Every commit on `main` that passes CI is deployed by `.github/workflows/deploy.yml`, called from CI: database
+migrations and Edge Functions to Supabase first, then the web app to GitHub Pages at
+`https://<owner>.github.io/<repository>/`. It can also be started by hand from the Actions tab.
+
+One-time setup:
+
+1. Create a Supabase project (region close to your players, for example Frankfurt).
+2. In the repository's **Settings → Secrets and variables → Actions**, add the secrets
+   `SUPABASE_ACCESS_TOKEN` (a personal access token from the Supabase dashboard) and
+   `SUPABASE_DB_PASSWORD`, and the variables `SUPABASE_PROJECT_REF`, `SUPABASE_URL` and
+   `SUPABASE_ANON_KEY` (the project's public key; it is meant to ship in the web app).
+3. In **Settings → Pages**, set the source to **GitHub Actions**.
+
+The service role key is never stored in the repository: the platform gives it to the Edge
+Functions itself.

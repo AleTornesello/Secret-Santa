@@ -1,0 +1,79 @@
+name: Deploy
+
+# CI calls this after every job passes on main, so only a green commit reaches production. It
+# can also be started by hand from the Actions tab. It needs, in the
+# repository settings:
+#   secrets   SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD
+#   variables SUPABASE_PROJECT_REF, SUPABASE_URL, SUPABASE_ANON_KEY (the public key)
+# and GitHub Pages set to deploy from GitHub Actions.
+on:
+  workflow_call:
+    secrets:
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_DB_PASSWORD:
+        required: true
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Check the deploy settings
+        run: |
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_REF; do
+            if [ -z "${!name}" ]; then echo "::error::$name is not set in the repository settings"; exit 1; fi
+          done
+      - name: Apply database migrations
+        # The CLI reads the password from SUPABASE_DB_PASSWORD, so it never appears in a command line.
+        run: pnpm exec supabase db push --remote="$SUPABASE_PROJECT_REF"
+      # The functions read SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which the platform
+      # provides itself: the service role key never passes through this repository.
+      - name: Deploy the Edge Functions
+        run: pnpm exec supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api
+
+  web:
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      # Pages serves the site from /<repository>/.
+      VITE_BASE_PATH: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Check the deploy settings
+        run: |
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY; do
+            if [ -z "${!name}" ]; then echo "::error::${name#VITE_} is not set in the repository variables"; exit 1; fi
+          done
+      - run: pnpm --filter @secret-santa/web build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

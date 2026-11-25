@@ -46,6 +46,12 @@ async function makeFetcher(): Promise<Fetcher> {
 }
 
 const fetcherPromise = makeFetcher();
+
+/** Calls one function by name, wherever it runs (see makeFetcher). */
+export async function fetchFunction(name: string, init: RequestInit): Promise<Response> {
+  const fetcher = await fetcherPromise;
+  return fetcher(name, init);
+}
 let ipCounter = 0;
 
 /** Each test client gets its own address, so rate limits do not leak between tests. */
@@ -59,11 +65,10 @@ export async function call<T = Record<string, unknown>>(
   body: unknown,
   options: { token?: string; ip?: string } = {},
 ): Promise<CallResult<T>> {
-  const fetcher = await fetcherPromise;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (options.token) headers.Authorization = `Bearer ${options.token}`;
   if (options.ip) headers['CF-Connecting-IP'] = options.ip;
-  const response = await fetcher(name, {
+  const response = await fetchFunction(name, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
