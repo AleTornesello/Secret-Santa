@@ -44,12 +44,13 @@ describe.skipIf(!anonKey)('the Realtime progress channel', () => {
       });
       // Counts only go up while people join. A cold stack may drop the very first message.
       const counts = messages.map((m) => m.joined);
-      expect(counts).toEqual([...counts].sort());
+      expect(counts).toEqual([...counts].sort((a, b) => a - b));
       expect(messages.at(-1)).toMatchObject({
         joined: 3,
         total: 3,
         status: 'drawn',
-        takenIds: [...ids].sort(),
+        // Postgres orders uuids like their lowercase text.
+        takenIds: [...ids].sort((a, b) => (a < b ? -1 : Number(a > b))),
       });
       const heard = JSON.stringify(messages);
       for (const name of NAMES) expect(heard).not.toContain(name);
