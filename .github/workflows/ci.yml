@@ -52,8 +52,9 @@ jobs:
       - name: Launch test, three phones on the real stack
         run: pnpm e2e:stack
 
+  # Skipped until the Supabase project is configured (see the README's Deploy section).
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.SUPABASE_PROJECT_REF != ''
     needs: [checks, database]
     permissions:
       contents: read
